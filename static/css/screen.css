@@ -1,0 +1,87 @@
+/* ##################################### Base tags ##################################### */
+body  {
+	background-color:#fff;
+    margin: 0;
+    padding: 0; 
+}
+a, a:hover, a:visited {
+	text-decoration:none !important;
+}
+a:not(.btn), a:visited:not(.btn) {
+	color:darkslategrey;
+}
+a:hover:not(.btn) {
+	color:grey;
+}
+h1, h2, h3, h4, h5 {
+	color:darkslategrey;
+}
+img {
+	vertical-align:middle;
+}
+div {
+	box-sizing: border-box;
+	vertical-align:top;
+}
+.gdb {
+	background-color:lime;
+	boder: 1px solid dashed;
+}
+.neutral {
+	background-color:white;
+	color:grey;
+	border:1px solid lightgrey;
+}
+.btn {
+	display:inline;
+}
+.nb {
+	border:0;
+}
+/* ##################################### Skeleton ##################################### */
+#header {
+	min-height:50px;
+	width:100%;
+	flex-basis: 100%;
+	background-color:steelblue;
+}
+#topbar {
+	position:absolute;
+	top:1em;
+	right:1em;
+}
+#logo, #logo a, #logo a:visited, #navbar a, #navbar a:visited {
+	color:white !important;
+}
+#logo {
+	padding:0.3em 0 0.3em 1em;
+	font-size:180%;
+}
+#topbar a:hover {
+	color:grey !important;
+}
+#content {
+	min-height:40em;
+	padding:0.5em 1em 4em 1em;
+}
+#footer {
+	min-height:50px;
+	background-color:steelblue;
+}
+/* ##################################### else ##################################### */
+.btn-default, .btn-default:active, .btn-default:focus {
+	border:1px solid lightgrey;
+	background-color:transparent;
+	color:darkslategrey;
+}
+.btn-default:hover {
+	border:1px solid lightgrey;
+	background-color:steelblue;
+	color:white;
+}
+.pull-right {
+	float:right;
+}
+.pull-left {
+	float:left;
+}

@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>{{ .Title }}</title>
+	{{ template "head.html" . }}
+</head>
+
+<body>
+<div id="app">
+	<div style="display:flex;flex-wrap:wrap">
+		<div id="header">
+			{{ template "header.html" . }}
+		</div>
+	</div>
+	<div id="content">
+	<script>
+		var centrifuge = new Centrifuge({
+		    url: "http://{{ .Conn.Addr }}",
+		    user: "{{ .Conn.User }}",
+		    timestamp: "{{ .Conn.Timestamp }}",
+		    token: "{{ .Conn.Token }}"
+		});
+		
+		var callbacks = {
+		    "message": function(dataset) {
+		    	console.log("MSG ");
+		    	console.log('DATASET: '+JSON.stringify(dataset));
+		    },
+		    "join": function(message) {
+		    	console.log('JOIN: '+JSON.stringify(message));
+		    },
+		    "leave": function(message) {
+		    	console.log('LEAVE: '+JSON.stringify(message));
+		    },
+		    "subscribe": function(context) {
+		    	console.log('SUBSCRIBE: '+JSON.stringify(context));
+		    },
+		    "error": function(errContext) {
+		    	console.log('ERROR: '+JSON.stringify(errContext));
+		    },
+		    "unsubscribe": function(context) {
+		    	console.log('UNSUBSCRIBE: '+JSON.stringify(context));
+		    }
+		}
+		
+		var subscription = centrifuge.subscribe("{{ .Domain }}", callbacks);
+		
+		centrifuge.on('connect', function(context) {
+			console.log("Connection ("+context.latency+"ms)");
+		});
+		
+		centrifuge.on('disconnect', function(context) {
+			console.log("Disconnection: "+context.reason);
+		});
+		
+		centrifuge.connect();
+	</script>
+	</div>
+	<div id="footer">
+		{{ template "footer.html" . }}
+	</div>
+	<script type="text/javascript" src="/static/js/vv.js"></script>
+	<script type="text/javascript" src="/static/vues/store.js"></script>
+	<script type="text/javascript" src="/static/vues/app.js"></script>
+</div>
+</body>
+</html>

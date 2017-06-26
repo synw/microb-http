@@ -1,0 +1,6 @@
+{
+	"centrifugo_addr":"localhost:8001",
+	"centrifugo_key":"secret_key",
+	"domain": "localhost",
+	"addr":"localhost:8080"
+}
