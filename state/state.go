@@ -21,6 +21,6 @@ func Init(dev bool, verbosity int) *terr.Trace {
 	instance := &http.Server{}
 	running := false
 	HttpServer = &types.HttpServer{Conf.Domain, Conf.Addr, instance, running}
-	httpServer.InitHttpServer(HttpServer, Conf.WsAddr, Conf.WsKey, Conf.Domain, false)
+	httpServer.InitHttpServer(HttpServer, Conf.Ws, Conf.WsAddr, Conf.WsKey, Conf.Domain, false)
 	return nil
 }

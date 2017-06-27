@@ -30,22 +30,24 @@ func getConfigPath() string {
 func getConf(name string) (*types.Conf, *terr.Trace) {
 	// set some defaults for conf
 	if name == "dev" {
-		viper.SetConfigName("dev_config")
+		viper.SetConfigName("http_dev_config")
 	} else {
-		viper.SetConfigName("config")
+		viper.SetConfigName("http_config")
 	}
 	cp := getConfigPath()
 	viper.AddConfigPath(cp)
 	viper.SetDefault("domain", "localhost")
 	viper.SetDefault("addr", "localhost:8080")
 	viper.SetDefault("centrifugo_addr", "localhost:8001")
+	viper.SetDefault("websockets", false)
 	// get the actual conf
 	err := viper.ReadInConfig()
 	if err != nil {
 		var conf *types.Conf
 		switch err.(type) {
 		case viper.ConfigParseError:
-			tr := terr.New("conf.getConf", err)
+			er := errors.New("Error parsing config " + err.Error())
+			tr := terr.New("conf.getConf", er)
 			return conf, tr
 		default:
 			err := errors.New("Unable to locate config file")
@@ -54,9 +56,10 @@ func getConf(name string) (*types.Conf, *terr.Trace) {
 		}
 	}
 	domain := viper.GetString("domain")
-	url := viper.GetString("addr")
-	addr := viper.GetString("centrifugo_addr")
+	addr := viper.GetString("addr")
+	caddr := viper.GetString("centrifugo_addr")
 	key := viper.GetString("centrifugo_key")
-	conf := types.Conf{domain, url, addr, key}
+	ws := viper.Get("websockets").(bool)
+	conf := types.Conf{domain, addr, caddr, key, ws}
 	return &conf, nil
 }

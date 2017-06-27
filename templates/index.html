@@ -11,7 +11,8 @@
 			{{ template "header.html" . }}
 		</div>
 	</div>
-	<div id="content">
+	<div id="content">{{ .Content }}
+	{{ if .Conn }}
 	<script>
 		var centrifuge = new Centrifuge({
 		    url: "http://{{ .Conn.Addr }}",
@@ -44,7 +45,7 @@
 		    }
 		}
 		
-		var subscription = centrifuge.subscribe("${{ .Domain }}", callbacks);
+		var subscription = centrifuge.subscribe("{{ .Domain }}", callbacks);
 		
 		centrifuge.on('connect', function(context) {
 			console.log("Connection ("+context.latency+"ms)");
@@ -56,6 +57,7 @@
 		
 		centrifuge.connect();
 	</script>
+	{{ end }}
 	</div>
 	<div id="footer">
 		{{ template "footer.html" . }}

@@ -54,9 +54,11 @@ var View = template.Must(template.New("index.html").ParseFiles(getTemplate("inde
 var V404 = template.Must(template.New("404.html").ParseFiles(getTemplate("404"), getTemplate("head"), getTemplate("header"), getTemplate("navbar"), getTemplate("footer")))
 var V500 = template.Must(template.New("500.html").ParseFiles(getTemplate("500"), getTemplate("head"), getTemplate("header"), getTemplate("navbar"), getTemplate("footer")))
 
-func InitHttpServer(server *types.HttpServer, addr string, key string, dm string, serve bool) {
+func InitHttpServer(server *types.HttpServer, ws bool, addr string, key string, dm string, serve bool) {
 	domain = dm
-	initWs(addr, key)
+	if ws {
+		initWs(addr, key)
+	}
 	// routing
 	r := chi.NewRouter()
 	// middleware
@@ -102,7 +104,7 @@ func Stop(server *types.HttpServer) *terr.Trace {
 	err := srv.Shutdown(ctx)
 	if err != nil {
 		tr := terr.New("httpServer.Stop", err)
-		events.New("error", "http", "httpServer.Stop", stopMsg(), nil)
+		events.New("error", "http", "httpServer.Stop", stopMsg(), tr)
 		return tr
 	}
 	server.Running = false
@@ -112,10 +114,20 @@ func Stop(server *types.HttpServer) *terr.Trace {
 
 // internal methods
 
+func serveRequest(resp http.ResponseWriter, req *http.Request) {
+	url := req.URL.Path
+	status := http.StatusOK
+	page := &types.Page{domain, url, "Microb", "Content", conn}
+	resp = httpResponseWriter{resp, &status}
+	renderTemplate(resp, page)
+}
+
 func renderTemplate(resp http.ResponseWriter, page *types.Page) {
 	err := View.Execute(resp, page)
 	if err != nil {
 		http.Error(resp, err.Error(), http.StatusInternalServerError)
+		msg := "Error rendering template"
+		events.Err("http", "httpServer.renderTemplate", msg, err)
 	}
 }
 
@@ -123,6 +135,8 @@ func render404(resp http.ResponseWriter, page *types.Page) {
 	err := V404.Execute(resp, page)
 	if err != nil {
 		http.Error(resp, err.Error(), http.StatusInternalServerError)
+		msg := "Error rendering 404"
+		events.Err("http", "httpServer.render404", msg, err)
 	}
 }
 
@@ -130,6 +144,8 @@ func render500(resp http.ResponseWriter, page *types.Page) {
 	err := V500.Execute(resp, page)
 	if err != nil {
 		http.Error(resp, err.Error(), http.StatusInternalServerError)
+		msg := "Error rendering 500"
+		events.Err("http", "httpServer.render500", msg, err)
 	}
 }
 
@@ -138,7 +154,8 @@ func serveAuth(resp http.ResponseWriter, req *http.Request) {
 	var data authRequest
 	err := decoder.Decode(&data)
 	if err != nil {
-		fmt.Println(err)
+		msg := "Error decoding data"
+		events.Err("http", "httpServer.serveAuth", msg, err)
 	}
 	r := map[string]map[string]string{}
 	for _, channel := range data.Channels {
@@ -157,14 +174,6 @@ func serveAuth(resp http.ResponseWriter, req *http.Request) {
 		fmt.Println(err)
 	}
 	fmt.Fprintf(resp, "%s\n", json_bytes)
-}
-
-func serveRequest(resp http.ResponseWriter, req *http.Request) {
-	url := req.URL.Path
-	status := http.StatusOK
-	page := &types.Page{domain, url, "Microb", "", conn}
-	resp = httpResponseWriter{resp, &status}
-	renderTemplate(resp, page)
 }
 
 func stopMsg() string {

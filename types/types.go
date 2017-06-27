@@ -16,6 +16,7 @@ type Conf struct {
 	Addr   string
 	WsAddr string
 	WsKey  string
+	Ws     bool
 }
 
 type Conn struct {
