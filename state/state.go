@@ -12,7 +12,7 @@ import (
 var HttpServer = &types.HttpServer{}
 var Conf *types.Conf
 
-func InitState(dev bool, verbosity int) *terr.Trace {
+func Init(dev bool, verbosity int) *terr.Trace {
 	Conf, tr := conf.GetConf(dev)
 	if tr != nil {
 		events.Terr("http", "state.InitState", "Unable to init http server config", tr)
