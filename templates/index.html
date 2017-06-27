@@ -6,7 +6,6 @@
 </head>
 
 <body>
-<div id="app">
 	<div style="display:flex;flex-wrap:wrap">
 		<div id="header">
 			{{ template "header.html" . }}
@@ -31,6 +30,7 @@
 		    },
 		    "leave": function(message) {
 		    	console.log('LEAVE: '+JSON.stringify(message));
+		    	alert("leave")
 		    },
 		    "subscribe": function(context) {
 		    	console.log('SUBSCRIBE: '+JSON.stringify(context));
@@ -40,10 +40,11 @@
 		    },
 		    "unsubscribe": function(context) {
 		    	console.log('UNSUBSCRIBE: '+JSON.stringify(context));
+		    	alert("un")
 		    }
 		}
 		
-		var subscription = centrifuge.subscribe("{{ .Domain }}", callbacks);
+		var subscription = centrifuge.subscribe("${{ .Domain }}", callbacks);
 		
 		centrifuge.on('connect', function(context) {
 			console.log("Connection ("+context.latency+"ms)");
@@ -59,6 +60,5 @@
 	<div id="footer">
 		{{ template "footer.html" . }}
 	</div>
-</div>
 </body>
 </html>

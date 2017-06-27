@@ -9,7 +9,7 @@ import (
 
 var Service *types.Service = &types.Service{
 	"http",
-	[]string{"start", "stop"},
+	[]string{"start", "stop", "parse_templates"},
 	ini,
 	dispatch,
 }

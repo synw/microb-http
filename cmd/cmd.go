@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/synw/microb-http/httpServer"
 	"github.com/synw/microb-http/state"
 	"github.com/synw/microb-http/state/mutate"
 	"github.com/synw/microb-http/types"
@@ -11,15 +12,26 @@ import (
 func Dispatch(cmd *datatypes.Command) *datatypes.Command {
 	com := &datatypes.Command{}
 	if cmd.Name == "start" {
-		res := Start(cmd, state.HttpServer)
+		res := start(cmd, state.HttpServer)
 		return res
 	} else if cmd.Name == "stop" {
-		return Stop(cmd, state.HttpServer)
+		return stop(cmd, state.HttpServer)
+	} else if cmd.Name == "parse_templates" {
+		return parseTemplates(cmd)
 	}
 	return com
 }
 
-func Start(cmd *datatypes.Command, server *types.HttpServer) *datatypes.Command {
+func parseTemplates(cmd *datatypes.Command) *datatypes.Command {
+	httpServer.ParseTemplates()
+	var resp []interface{}
+	resp = append(resp, "Templates parsed")
+	cmd.Status = "success"
+	cmd.ReturnValues = resp
+	return cmd
+}
+
+func start(cmd *datatypes.Command, server *types.HttpServer) *datatypes.Command {
 	tr := mutate.StartHttpServer(server)
 	if tr != nil {
 		cmd.Trace = tr
@@ -34,7 +46,7 @@ func Start(cmd *datatypes.Command, server *types.HttpServer) *datatypes.Command 
 	return cmd
 }
 
-func Stop(cmd *datatypes.Command, server *types.HttpServer) *datatypes.Command {
+func stop(cmd *datatypes.Command, server *types.HttpServer) *datatypes.Command {
 	tr := mutate.StopHttpServer(server)
 	if tr != nil {
 		cmd.Trace = tr

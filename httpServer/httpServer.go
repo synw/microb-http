@@ -188,6 +188,10 @@ func getDir() string {
 	return d
 }
 
+func ParseTemplates() {
+	View = template.Must(template.New("index.html").ParseFiles(getTemplate("index"), getTemplate("head"), getTemplate("header"), getTemplate("navbar"), getTemplate("footer")))
+}
+
 func getTemplate(name string) string {
 	t := dir + "/templates/" + name + ".html"
 	return t
