@@ -27,6 +27,11 @@ func Start(path string, cli *centcom.Cli, channel string, verbosity int, dev boo
 			tr := terr.New("wa.Start", err)
 			tr.Fatal("start watcher")
 		}
+		err = w.AddRecursive("../microb-http/static/content")
+		if err != nil {
+			tr := terr.New("wa.Start", err)
+			tr.Fatal("start watcher")
+		}
 	} else {
 		err := w.AddRecursive("templates")
 		if err != nil {
@@ -43,8 +48,13 @@ func Start(path string, cli *centcom.Cli, channel string, verbosity int, dev boo
 			tr := terr.New("wa.Start", err)
 			tr.Fatal("start watcher")
 		}
+		err = w.AddRecursive("static/content")
+		if err != nil {
+			tr := terr.New("wa.Start", err)
+			tr.Fatal("start watcher")
+		}
 	}
-	w.FilterOps(wa.Write, wa.Create, wa.Move, wa.Remove)
+	w.FilterOps(wa.Write, wa.Create, wa.Move, wa.Remove, wa.Rename)
 	if verbosity > 1 {
 		fmt.Println("Watching files :")
 		for _, f := range w.WatchedFiles() {

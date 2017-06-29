@@ -36,6 +36,7 @@ var conn *types.Conn
 var key string
 var domain string
 var edit_channel string
+var datasource *types.Datasource
 
 func getToken(user string, timestamp string, secret string) string {
 	info := ""
@@ -55,8 +56,9 @@ var View = template.Must(template.New("index.html").ParseFiles(getTemplate("inde
 var V404 = template.Must(template.New("404.html").ParseFiles(getTemplate("404"), getTemplate("head"), getTemplate("header"), getTemplate("navbar"), getTemplate("footer")))
 var V500 = template.Must(template.New("500.html").ParseFiles(getTemplate("500"), getTemplate("head"), getTemplate("header"), getTemplate("navbar"), getTemplate("footer")))
 
-func InitHttpServer(server *types.HttpServer, ws bool, addr string, key string, dm string, serve bool, ec string) {
+func InitHttpServer(server *types.HttpServer, ws bool, addr string, key string, dm string, serve bool, ec string, ds *types.Datasource) {
 	domain = dm
+	datasource = ds
 	edit_channel = ec
 	if ws {
 		initWs(addr, key)
@@ -76,7 +78,7 @@ func InitHttpServer(server *types.HttpServer, ws bool, addr string, key string, 
 		r.Post("/auth", serveAuth)
 	})
 	r.Route("/", func(r chi.Router) {
-		r.Get("/", serveRequest)
+		r.Get("/*", serveRequest)
 	})
 	// init
 	httpServer := &http.Server{
@@ -123,8 +125,14 @@ func ParseTemplates() {
 func serveRequest(resp http.ResponseWriter, req *http.Request) {
 	url := req.URL.Path
 	status := http.StatusOK
-	page := &types.Page{domain, url, "Microb", "Content", conn, edit_channel}
 	resp = httpResponseWriter{resp, &status}
+	page, tr := getPage(domain, url, conn, edit_channel)
+	if tr != nil {
+		events.Terr("http", "httpServer.serveRequest", "Error retrieving page", tr)
+		p := &types.Page{}
+		render404(resp, p)
+		return
+	}
 	renderTemplate(resp, page)
 }
 

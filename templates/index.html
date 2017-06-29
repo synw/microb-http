@@ -11,7 +11,9 @@
 			{{ template "header.html" . }}
 		</div>
 	</div>
-	<div id="content">{{ .Content }}
+	<div id="content">
+	<h1>{{ .Url }}</h1>
+	{{ .Content }}
 	{{ if .Conn }}
 	<script>
 		var centrifuge = new Centrifuge({
