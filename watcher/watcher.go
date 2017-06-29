@@ -48,8 +48,10 @@ func Start(path string, cli *centcom.Cli, channel string, verbosity int, dev boo
 	go func() {
 		for {
 			select {
-			case _ = <-w.Event:
-				//fmt.Println("EVENT", event.Path)
+			case e := <-w.Event:
+				if verbosity > 2 {
+					fmt.Println("Change detected in", e.Path, "reloading")
+				}
 				handle(cli, channel)
 			case err := <-w.Error:
 				fmt.Println("Watcher error", err)
@@ -60,7 +62,7 @@ func Start(path string, cli *centcom.Cli, channel string, verbosity int, dev boo
 		}
 	}()
 	// start listening
-	err = w.Start(time.Millisecond * 100)
+	err = w.Start(time.Millisecond * 200)
 	if err != nil {
 		tr := terr.New("watcher.Start", err)
 		tr.Fatal("start watcher")

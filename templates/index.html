@@ -17,7 +17,7 @@
 	{{ if .Conn }}
 	<script>
 		var centrifuge = new Centrifuge({
-		    url: "{{ .Conn.Addr }}",
+		    url: "http://{{ .Conn.Addr }}",
 		    user: "{{ .Conn.User }}",
 		    timestamp: "{{ .Conn.Timestamp }}",
 		    token: "{{ .Conn.Token }}"
