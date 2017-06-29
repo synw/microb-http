@@ -14,8 +14,8 @@ var Service *types.Service = &types.Service{
 	dispatch,
 }
 
-func ini(dev bool, verbosity int) *terr.Trace {
-	return state.Init(dev, verbosity)
+func ini(dev bool, verbosity int, start bool) *terr.Trace {
+	return state.Init(dev, verbosity, start)
 }
 
 func dispatch(c *types.Command) *types.Command {

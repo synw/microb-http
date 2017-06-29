@@ -56,7 +56,7 @@ var View = template.Must(template.New("index.html").ParseFiles(getTemplate("inde
 var V404 = template.Must(template.New("404.html").ParseFiles(getTemplate("404"), getTemplate("head"), getTemplate("header"), getTemplate("navbar"), getTemplate("footer")))
 var V500 = template.Must(template.New("500.html").ParseFiles(getTemplate("500"), getTemplate("head"), getTemplate("header"), getTemplate("navbar"), getTemplate("footer")))
 
-func InitHttpServer(server *types.HttpServer, ws bool, addr string, key string, dm string, serve bool, ec string, ds *types.Datasource) {
+func Init(server *types.HttpServer, ws bool, addr string, key string, dm string, serve bool, ec string, ds *types.Datasource) {
 	domain = dm
 	datasource = ds
 	edit_channel = ec
@@ -90,7 +90,7 @@ func InitHttpServer(server *types.HttpServer, ws bool, addr string, key string, 
 	server.Instance = httpServer
 	// run
 	if serve == true {
-		Run(server)
+		go Run(server)
 	}
 }
 
