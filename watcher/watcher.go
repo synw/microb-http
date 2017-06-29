@@ -12,53 +12,36 @@ var w = wa.New()
 
 func Start(path string, cli *centcom.Cli, channel string, verbosity int, dev bool) {
 	if dev == true {
-		err := w.AddRecursive("../microb-http/templates")
-		if err != nil {
-			tr := terr.New("wa.Start", err)
-			tr.Fatal("start watcher")
-		}
-		err = w.AddRecursive("../microb-http/static/js")
-		if err != nil {
-			tr := terr.New("wa.Start", err)
-			tr.Fatal("start watcher")
-		}
-		err = w.AddRecursive("../microb-http/static/css")
-		if err != nil {
-			tr := terr.New("wa.Start", err)
-			tr.Fatal("start watcher")
-		}
-		err = w.AddRecursive("../microb-http/static/content")
-		if err != nil {
-			tr := terr.New("wa.Start", err)
-			tr.Fatal("start watcher")
-		}
-	} else {
-		err := w.AddRecursive("templates")
-		if err != nil {
-			tr := terr.New("wa.Start", err)
-			tr.Fatal("start watcher")
-		}
-		err = w.AddRecursive("static/js")
-		if err != nil {
-			tr := terr.New("wa.Start", err)
-			tr.Fatal("start watcher")
-		}
-		err = w.AddRecursive("static/css")
-		if err != nil {
-			tr := terr.New("wa.Start", err)
-			tr.Fatal("start watcher")
-		}
-		err = w.AddRecursive("static/content")
-		if err != nil {
-			tr := terr.New("wa.Start", err)
-			tr.Fatal("start watcher")
-		}
+		_ = w.AddRecursive("../microb-http/templates")
+		_ = w.AddRecursive("../microb-http/static/js")
+		_ = w.AddRecursive("../microb-http/static/css")
+		_ = w.AddRecursive("../microb-http/static/content")
+	}
+	err := w.AddRecursive("templates")
+	if err != nil {
+		tr := terr.New("wa.Start", err)
+		tr.Fatal("start watcher")
+	}
+	err = w.AddRecursive("static/js")
+	if err != nil {
+		tr := terr.New("wa.Start", err)
+		tr.Fatal("start watcher")
+	}
+	err = w.AddRecursive("static/css")
+	if err != nil {
+		tr := terr.New("wa.Start", err)
+		tr.Fatal("start watcher")
+	}
+	err = w.AddRecursive("static/content")
+	if err != nil {
+		tr := terr.New("wa.Start", err)
+		tr.Fatal("start watcher")
 	}
 	w.FilterOps(wa.Write, wa.Create, wa.Move, wa.Remove, wa.Rename)
 	if verbosity > 1 {
 		fmt.Println("Watching files :")
-		for _, f := range w.WatchedFiles() {
-			fmt.Printf("%s\n", f.Name())
+		for path, f := range w.WatchedFiles() {
+			fmt.Printf("%s %s\n", f.Name(), path)
 		}
 	}
 	// lauch listener
@@ -77,7 +60,7 @@ func Start(path string, cli *centcom.Cli, channel string, verbosity int, dev boo
 		}
 	}()
 	// start listening
-	err := w.Start(time.Millisecond * 100)
+	err = w.Start(time.Millisecond * 100)
 	if err != nil {
 		tr := terr.New("watcher.Start", err)
 		tr.Fatal("start watcher")

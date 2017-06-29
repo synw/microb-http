@@ -15,7 +15,7 @@ import (
 	"html/template"
 	"net/http"
 	"path"
-	"path/filepath"
+	//"path/filepath"
 	"runtime"
 	"strings"
 	"time"
@@ -71,8 +71,10 @@ func Init(server *types.HttpServer, ws bool, addr string, key string, dm string,
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.StripSlashes)
 	// static
-	filesDir := filepath.Join(dir, "static")
-	r.FileServer("/static", http.Dir(filesDir))
+	//filesDir := filepath.Join(dir, "static")
+	//fmt.Println("STATIC DIR", filesDir)
+
+	r.FileServer("/static", http.Dir("static"))
 	// routes
 	r.Route("/centrifuge", func(r chi.Router) {
 		r.Post("/auth", serveAuth)
@@ -212,6 +214,6 @@ func getDir() string {
 }
 
 func getTemplate(name string) string {
-	t := dir + "/templates/" + name + ".html"
+	t := "templates/" + name + ".html"
 	return t
 }

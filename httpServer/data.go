@@ -8,7 +8,7 @@ import (
 )
 
 func getPage(domain string, url string, conn *types.Conn, edit_channel string) (*types.Page, *terr.Trace) {
-	filepath := dir + "/static/content/" + getFilepath(url)
+	filepath := "static/content/" + getFilepath(url)
 	content, tr := getContent(filepath)
 	if tr != nil {
 		tr := terr.Pass("httpServer.data.getPage", tr)
