@@ -15,7 +15,7 @@
 	{{ if .Conn }}
 	<script>
 		var centrifuge = new Centrifuge({
-		    url: "http://{{ .Conn.Addr }}",
+		    url: "{{ .Conn.Addr }}",
 		    user: "{{ .Conn.User }}",
 		    timestamp: "{{ .Conn.Timestamp }}",
 		    token: "{{ .Conn.Token }}"
@@ -24,7 +24,10 @@
 		var callbacks = {
 		    "message": function(dataset) {
 		    	console.log("MSG ");
-		    	console.log('DATASET: '+JSON.stringify(dataset));
+		    	console.log('DATASET: '+JSON.stringify(dataset), dataset.data.reload);
+		    	if (dataset.data.reload == "true") {
+		    		window.location.reload(true);
+		    	}
 		    },
 		    "join": function(message) {
 		    	console.log('JOIN: '+JSON.stringify(message));
@@ -45,7 +48,7 @@
 		    }
 		}
 		
-		var subscription = centrifuge.subscribe("{{ .Domain }}", callbacks);
+		var subscription = centrifuge.subscribe("{{ .EditChan }}", callbacks);
 		
 		centrifuge.on('connect', function(context) {
 			console.log("Connection ("+context.latency+"ms)");

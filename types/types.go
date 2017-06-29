@@ -11,12 +11,23 @@ type HttpServer struct {
 	Running  bool
 }
 
+type Datasource struct {
+	Name string
+	Type string
+	Path string
+	User string
+	Pwd  string
+	Db   string
+}
+
 type Conf struct {
-	Domain string
-	Addr   string
-	WsAddr string
-	WsKey  string
-	Ws     bool
+	Domain     string
+	Addr       string
+	WsAddr     string
+	WsKey      string
+	Ws         bool
+	Datasource *Datasource
+	EditChan   string
 }
 
 type Conn struct {
@@ -27,9 +38,10 @@ type Conn struct {
 }
 
 type Page struct {
-	Domain  string
-	Url     string
-	Title   string
-	Content string
-	Conn    *Conn
+	Domain   string
+	Url      string
+	Title    string
+	Content  string
+	Conn     *Conn
+	EditChan string
 }

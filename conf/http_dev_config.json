@@ -1,7 +1,12 @@
 {
-	"centrifugo_addr":"localhost:8001",
+	"centrifugo_addr":"http://localhost:8001",
 	"centrifugo_key":"secret_key",
 	"domain": "localhost",
-	"addr":"localhost:8081",
-	"websockets": true
+	"addr":"localhost:8080",
+	"websockets": true,
+	"datasources": {
+		"name": "local",
+		"type": "filesystem",
+		"path": "templates/content"
+	}
 }
