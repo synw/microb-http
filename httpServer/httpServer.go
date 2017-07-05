@@ -15,7 +15,6 @@ import (
 	"html/template"
 	"net/http"
 	"path"
-	//"path/filepath"
 	"runtime"
 	"strings"
 	"time"
@@ -37,6 +36,9 @@ var key string
 var domain string
 var edit_channel string
 var datasource *types.Datasource
+var View *template.Template
+var V404 *template.Template
+var V500 *template.Template
 
 func getToken(user string, timestamp string, secret string) string {
 	info := ""
@@ -52,9 +54,11 @@ func initWs(addr string, k string) {
 	conn = &types.Conn{addr, timestamp, user, token}
 }
 
-var View = template.Must(template.New("index.html").ParseFiles(getTemplate("index"), getTemplate("head"), getTemplate("header"), getTemplate("navbar"), getTemplate("footer")))
-var V404 = template.Must(template.New("404.html").ParseFiles(getTemplate("404"), getTemplate("head"), getTemplate("header"), getTemplate("navbar"), getTemplate("footer")))
-var V500 = template.Must(template.New("500.html").ParseFiles(getTemplate("500"), getTemplate("head"), getTemplate("header"), getTemplate("navbar"), getTemplate("footer")))
+func parseTemplates() {
+	View = template.Must(template.New("index.html").ParseFiles(getTemplate("index"), getTemplate("head"), getTemplate("header"), getTemplate("navbar"), getTemplate("footer")))
+	V404 = template.Must(template.New("404.html").ParseFiles(getTemplate("404"), getTemplate("head"), getTemplate("header"), getTemplate("navbar"), getTemplate("footer")))
+	V500 = template.Must(template.New("500.html").ParseFiles(getTemplate("500"), getTemplate("head"), getTemplate("header"), getTemplate("navbar"), getTemplate("footer")))
+}
 
 func Init(server *types.HttpServer, ws bool, addr string, key string, dm string, serve bool, ec string, ds *types.Datasource) {
 	domain = dm
@@ -63,6 +67,8 @@ func Init(server *types.HttpServer, ws bool, addr string, key string, dm string,
 	if ws {
 		initWs(addr, key)
 	}
+	// templates init
+	parseTemplates()
 	// routing
 	r := chi.NewRouter()
 	// middleware
@@ -74,7 +80,7 @@ func Init(server *types.HttpServer, ws bool, addr string, key string, dm string,
 	//filesDir := filepath.Join(dir, "static")
 	//fmt.Println("STATIC DIR", filesDir)
 
-	r.FileServer("/static", http.Dir("static"))
+	r.FileServer("/static", http.Dir(dir+"/static"))
 	// routes
 	r.Route("/centrifuge", func(r chi.Router) {
 		r.Post("/auth", serveAuth)
@@ -119,7 +125,7 @@ func Stop(server *types.HttpServer) *terr.Trace {
 }
 
 func ParseTemplates() {
-	View = template.Must(template.New("index.html").ParseFiles(getTemplate("index"), getTemplate("head"), getTemplate("header"), getTemplate("navbar"), getTemplate("footer")))
+	parseTemplates()
 }
 
 // internal methods
@@ -214,6 +220,6 @@ func getDir() string {
 }
 
 func getTemplate(name string) string {
-	t := "templates/" + name + ".html"
+	t := dir + "/templates/" + name + ".html"
 	return t
 }
