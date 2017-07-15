@@ -4,6 +4,7 @@ import (
 	"fmt"
 	wa "github.com/radovskyb/watcher"
 	"github.com/synw/centcom"
+	"github.com/synw/microb/libmicrob/events"
 	"github.com/synw/terr"
 	"time"
 )
@@ -11,6 +12,7 @@ import (
 var w = wa.New()
 
 func Start(path string, cli *centcom.Cli, channel string, verbosity int, dev bool) {
+	iserr := false
 	if dev == true {
 		_ = w.AddRecursive("../microb-http/templates")
 		_ = w.AddRecursive("../microb-http/static/js")
@@ -20,25 +22,33 @@ func Start(path string, cli *centcom.Cli, channel string, verbosity int, dev boo
 	err := w.AddRecursive("templates")
 	if err != nil {
 		tr := terr.New("wa.Start", err)
-		tr.Fatal("start watcher")
+		tr.Printf("start watcher")
+		events.Terr("http", "watcher.Start", "Error finding templates", tr)
+		iserr = true
 	}
 	err = w.AddRecursive("static/js")
 	if err != nil {
 		tr := terr.New("wa.Start", err)
-		tr.Fatal("start watcher")
+		tr.Printf("start watcher")
+		events.Terr("http", "watcher.Start", "Error finding static/js", tr)
+		iserr = true
 	}
 	err = w.AddRecursive("static/css")
 	if err != nil {
 		tr := terr.New("wa.Start", err)
-		tr.Fatal("start watcher")
+		tr.Printf("start watcher")
+		events.Terr("http", "watcher.Start", "Error finding static/css", tr)
+		iserr = true
 	}
 	err = w.AddRecursive("static/content")
 	if err != nil {
 		tr := terr.New("wa.Start", err)
-		tr.Fatal("start watcher")
+		tr.Printf("start watcher")
+		events.Terr("http", "watcher.Start", "Error finding static/content", tr)
+		iserr = true
 	}
 	w.FilterOps(wa.Write, wa.Create, wa.Move, wa.Remove, wa.Rename)
-	if verbosity > 1 {
+	if verbosity > 1 && iserr == false {
 		fmt.Println("Watching files :")
 		for path, f := range w.WatchedFiles() {
 			fmt.Printf("%s %s\n", f.Name(), path)
@@ -65,7 +75,8 @@ func Start(path string, cli *centcom.Cli, channel string, verbosity int, dev boo
 	err = w.Start(time.Millisecond * 200)
 	if err != nil {
 		tr := terr.New("watcher.Start", err)
-		tr.Fatal("start watcher")
+		tr.Printf("start watcher")
+		events.Terr("http", "watcher.Start", "Error starting the watcher", tr)
 	}
 }
 
