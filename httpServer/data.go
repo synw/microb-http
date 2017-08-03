@@ -3,6 +3,7 @@ package httpServer
 import (
 	"github.com/synw/microb-http/types"
 	"github.com/synw/terr"
+	"html/template"
 	"io/ioutil"
 	"strings"
 )
@@ -16,7 +17,7 @@ func getPage(domain string, url string, conn *types.Conn, edit_channel string) (
 		return p, tr
 	}
 	title := url
-	page := &types.Page{domain, url, title, content, conn, edit_channel}
+	page := &types.Page{domain, url, title, template.HTML(content), conn, edit_channel}
 	terr.Debug(page)
 	return page, nil
 }

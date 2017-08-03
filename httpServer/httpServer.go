@@ -145,6 +145,7 @@ func serveRequest(resp http.ResponseWriter, req *http.Request) {
 }
 
 func renderTemplate(resp http.ResponseWriter, page *types.Page) {
+	page.Content = template.HTML(page.Content)
 	err := View.Execute(resp, page)
 	if err != nil {
 		http.Error(resp, err.Error(), http.StatusInternalServerError)

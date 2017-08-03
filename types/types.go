@@ -1,6 +1,7 @@
 package types
 
 import (
+	"html/template"
 	"net/http"
 )
 
@@ -41,7 +42,7 @@ type Page struct {
 	Domain   string
 	Url      string
 	Title    string
-	Content  string
+	Content  template.HTML
 	Conn     *Conn
 	EditChan string
 }
