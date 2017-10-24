@@ -14,7 +14,9 @@ import (
 	"github.com/synw/terr"
 	"html/template"
 	"net/http"
+	"os"
 	"path"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
@@ -221,6 +223,10 @@ func getDir() string {
 }
 
 func getTemplate(name string) string {
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		panic("Error")
+	}
 	t := dir + "/templates/" + name + ".html"
 	return t
 }
