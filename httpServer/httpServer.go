@@ -38,9 +38,11 @@ var key string
 var domain string
 var edit_channel string
 var datasource *types.Datasource
-var View *template.Template
-var V404 *template.Template
-var V500 *template.Template
+
+//var View *template.Template
+//var V404 *template.Template
+//var V500 *template.Template
+var templates = template.Must(template.ParseGlob("templates/*"))
 
 func getToken(user string, timestamp string, secret string) string {
 	info := ""
@@ -57,9 +59,10 @@ func initWs(addr string, k string) {
 }
 
 func parseTemplates() {
-	View = template.Must(template.New("index.html").ParseFiles(getTemplate("index"), getTemplate("head"), getTemplate("header"), getTemplate("navbar"), getTemplate("footer")))
-	V404 = template.Must(template.New("404.html").ParseFiles(getTemplate("404"), getTemplate("head"), getTemplate("header"), getTemplate("navbar"), getTemplate("footer")))
-	V500 = template.Must(template.New("500.html").ParseFiles(getTemplate("500"), getTemplate("head"), getTemplate("header"), getTemplate("navbar"), getTemplate("footer")))
+	templates = template.Must(template.ParseGlob("templates/*"))
+	//View = template.Must(template.New("index.html").ParseFiles(getTemplate("index"), getTemplate("head"), getTemplate("header"), getTemplate("navbar"), getTemplate("footer")))
+	//V404 = template.Must(template.New("404.html").ParseFiles(getTemplate("404"), getTemplate("head"), getTemplate("header"), getTemplate("navbar"), getTemplate("footer")))
+	//V500 = template.Must(template.New("500.html").ParseFiles(getTemplate("500"), getTemplate("head"), getTemplate("header"), getTemplate("navbar"), getTemplate("footer")))
 }
 
 func Init(server *types.HttpServer, ws bool, addr string, key string, dm string, serve bool, ec string, ds *types.Datasource) {
@@ -136,19 +139,21 @@ func serveRequest(resp http.ResponseWriter, req *http.Request) {
 	url := req.URL.Path
 	status := http.StatusOK
 	resp = httpResponseWriter{resp, &status}
-	page, tr := getPage(domain, url, conn, edit_channel)
-	if tr != nil {
+	page, _ := getPage(domain, url, conn, edit_channel)
+	/*if tr != nil {
 		events.Terr("http", "httpServer.serveRequest", "Error retrieving page", tr)
 		p := &types.Page{}
 		render404(resp, p)
 		return
-	}
+	}*/
 	renderTemplate(resp, page)
 }
 
 func renderTemplate(resp http.ResponseWriter, page *types.Page) {
 	page.Content = template.HTML(page.Content)
-	err := View.Execute(resp, page)
+	//err := View.Execute(resp, page)
+	//name = page.
+	err := templates.ExecuteTemplate(resp, "index.html", nil)
 	if err != nil {
 		http.Error(resp, err.Error(), http.StatusInternalServerError)
 		msg := "Error rendering template"
@@ -156,6 +161,7 @@ func renderTemplate(resp http.ResponseWriter, page *types.Page) {
 	}
 }
 
+/*
 func render404(resp http.ResponseWriter, page *types.Page) {
 	err := V404.Execute(resp, page)
 	if err != nil {
@@ -172,7 +178,7 @@ func render500(resp http.ResponseWriter, page *types.Page) {
 		msg := "Error rendering 500"
 		events.Err("http", "httpServer.render500", msg, err)
 	}
-}
+}*/
 
 func serveAuth(resp http.ResponseWriter, req *http.Request) {
 	decoder := json.NewDecoder(req.Body)
