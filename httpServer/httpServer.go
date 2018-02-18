@@ -39,10 +39,7 @@ var domain string
 var edit_channel string
 var datasource *types.Datasource
 
-//var View *template.Template
-//var V404 *template.Template
-//var V500 *template.Template
-var templates = template.Must(template.ParseGlob("templates/*"))
+var templates *template.Template
 
 func getToken(user string, timestamp string, secret string) string {
 	info := ""
@@ -58,11 +55,17 @@ func initWs(addr string, k string) {
 	conn = &types.Conn{addr, timestamp, user, token}
 }
 
-func parseTemplates() {
-	templates = template.Must(template.ParseGlob("templates/*"))
-	//View = template.Must(template.New("index.html").ParseFiles(getTemplate("index"), getTemplate("head"), getTemplate("header"), getTemplate("navbar"), getTemplate("footer")))
-	//V404 = template.Must(template.New("404.html").ParseFiles(getTemplate("404"), getTemplate("head"), getTemplate("header"), getTemplate("navbar"), getTemplate("footer")))
-	//V500 = template.Must(template.New("500.html").ParseFiles(getTemplate("500"), getTemplate("head"), getTemplate("header"), getTemplate("navbar"), getTemplate("footer")))
+func parseTemplates() (*template.Template, *terr.Trace) {
+	path, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	path = path + "/templates/*"
+	if err != nil {
+		msg := "Can not find templates directory"
+		tr := terr.New("httpServer.Stop", err)
+		events.New("error", "http", "httpServer.parseTemplates", msg, tr)
+		return nil, tr
+	}
+	tmps := template.Must(template.ParseGlob(path))
+	return tmps, nil
 }
 
 func Init(server *types.HttpServer, ws bool, addr string, key string, dm string, serve bool, ec string, ds *types.Datasource) {
@@ -73,7 +76,7 @@ func Init(server *types.HttpServer, ws bool, addr string, key string, dm string,
 		initWs(addr, key)
 	}
 	// templates init
-	parseTemplates()
+	templates, _ = parseTemplates()
 	// routing
 	r := chi.NewRouter()
 	// middleware
@@ -82,9 +85,6 @@ func Init(server *types.HttpServer, ws bool, addr string, key string, dm string,
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.StripSlashes)
 	// static
-	//filesDir := filepath.Join(dir, "static")
-	//fmt.Println("STATIC DIR", filesDir)
-
 	r.FileServer("/static", http.Dir(dir+"/static"))
 	// routes
 	r.Route("/centrifuge", func(r chi.Router) {
@@ -130,7 +130,7 @@ func Stop(server *types.HttpServer) *terr.Trace {
 }
 
 func ParseTemplates() {
-	parseTemplates()
+	_, _ = parseTemplates()
 }
 
 // internal methods
