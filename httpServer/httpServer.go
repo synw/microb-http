@@ -139,13 +139,13 @@ func serveRequest(resp http.ResponseWriter, req *http.Request) {
 	url := req.URL.Path
 	status := http.StatusOK
 	resp = httpResponseWriter{resp, &status}
-	page, _ := getPage(domain, url, conn, edit_channel)
-	/*if tr != nil {
+	page, tr := getPage(domain, url, conn, edit_channel)
+	if tr != nil {
 		events.Terr("http", "httpServer.serveRequest", "Error retrieving page", tr)
 		p := &types.Page{}
 		render404(resp, p)
 		return
-	}*/
+	}
 	renderTemplate(resp, page)
 }
 
@@ -159,9 +159,8 @@ func renderTemplate(resp http.ResponseWriter, page *types.Page) {
 	}
 }
 
-/*
 func render404(resp http.ResponseWriter, page *types.Page) {
-	err := V404.Execute(resp, page)
+	err := templates.ExecuteTemplate(resp, "404.html", page)
 	if err != nil {
 		http.Error(resp, err.Error(), http.StatusInternalServerError)
 		msg := "Error rendering 404"
@@ -170,13 +169,13 @@ func render404(resp http.ResponseWriter, page *types.Page) {
 }
 
 func render500(resp http.ResponseWriter, page *types.Page) {
-	err := V500.Execute(resp, page)
+	err := templates.ExecuteTemplate(resp, "500.html", page)
 	if err != nil {
 		http.Error(resp, err.Error(), http.StatusInternalServerError)
 		msg := "Error rendering 500"
 		events.Err("http", "httpServer.render500", msg, err)
 	}
-}*/
+}
 
 func serveAuth(resp http.ResponseWriter, req *http.Request) {
 	decoder := json.NewDecoder(req.Body)
