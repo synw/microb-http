@@ -67,6 +67,7 @@ func parseTemplates() (*template.Template, *terr.Trace) {
 		return nil, tr
 	}
 	tmps := template.Must(template.ParseGlob(path))
+	templates = tmps
 	return tmps, nil
 }
 
@@ -86,8 +87,16 @@ func Init(server *types.HttpServer, ws bool, addr string, key string, dm string,
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.StripSlashes)
+	path, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	path = path + "/static"
+	if err != nil {
+		msg := "Can not find static directory"
+		tr := terr.New("httpServer.Init", err)
+		events.New("error", "http", "httpServer.Init", msg, tr)
+		return
+	}
 	// static
-	r.FileServer("/static", http.Dir(dir+"/static"))
+	r.FileServer("/static", http.Dir(path))
 	// routes
 	r.Route("/centrifuge", func(r chi.Router) {
 		r.Post("/auth", serveAuth)
