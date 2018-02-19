@@ -9,6 +9,7 @@ import (
 	"github.com/centrifugal/centrifugo/libcentrifugo/auth"
 	"github.com/pressly/chi"
 	"github.com/pressly/chi/middleware"
+	"github.com/synw/microb-http/conf"
 	"github.com/synw/microb-http/types"
 	"github.com/synw/microb/libmicrob/events"
 	"github.com/synw/terr"
@@ -21,6 +22,8 @@ import (
 	"strings"
 	"time"
 )
+
+var config, _ = conf.GetConf(true)
 
 type httpResponseWriter struct {
 	http.ResponseWriter
@@ -38,7 +41,6 @@ var key string
 var domain string
 var edit_channel string
 var datasource *types.Datasource
-
 var templates *template.Template
 
 func getToken(user string, timestamp string, secret string) string {
@@ -178,6 +180,10 @@ func render500(resp http.ResponseWriter, page *types.Page) {
 }
 
 func serveAuth(resp http.ResponseWriter, req *http.Request) {
+	// this is used only for autoreload in dev
+	if config.Dev != true {
+		return
+	}
 	decoder := json.NewDecoder(req.Body)
 	var data authRequest
 	err := decoder.Decode(&data)

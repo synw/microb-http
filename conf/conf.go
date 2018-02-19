@@ -10,6 +10,8 @@ import (
 	"runtime"
 )
 
+var Conf *types.Conf
+
 func GetConf(dev bool) (*types.Conf, *terr.Trace) {
 	name := "normal"
 	if dev {
@@ -29,8 +31,10 @@ func getConfigPath() string {
 
 func getConf(name string) (*types.Conf, *terr.Trace) {
 	// set some defaults for conf
+	dev := false
 	if name == "dev" {
 		viper.SetConfigName("http_dev_config")
+		dev = true
 	} else {
 		viper.SetConfigName("http_config")
 	}
@@ -80,6 +84,7 @@ func getConf(name string) (*types.Conf, *terr.Trace) {
 	ec := "$edit_" + domain
 	viper.SetDefault("edit_channel", ec)
 	ech := viper.GetString("edit_channel")
-	conf := types.Conf{domain, addr, caddr, key, ws, datasource, ech}
+	conf := types.Conf{domain, addr, caddr, key, ws, datasource, ech, dev}
+	Conf = &conf
 	return &conf, nil
 }

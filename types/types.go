@@ -29,6 +29,7 @@ type Conf struct {
 	Ws         bool
 	Datasource *Datasource
 	EditChan   string
+	Dev        bool
 }
 
 type Conn struct {
