@@ -9,7 +9,6 @@ import (
 	"github.com/centrifugal/centrifugo/libcentrifugo/auth"
 	"github.com/pressly/chi"
 	"github.com/pressly/chi/middleware"
-	"github.com/synw/microb-http/conf"
 	"github.com/synw/microb-http/types"
 	"github.com/synw/microb/libmicrob/events"
 	"github.com/synw/terr"
@@ -20,7 +19,7 @@ import (
 	"time"
 )
 
-var config, _ = conf.GetConf(true)
+var isdev = false
 
 type httpResponseWriter struct {
 	http.ResponseWriter
@@ -67,7 +66,8 @@ func parseTemplates() (*template.Template, *terr.Trace) {
 	return tmps, nil
 }
 
-func Init(server *types.HttpServer, ws bool, addr string, key string, dm string, serve bool, ec string, ds *types.Datasource) {
+func Init(server *types.HttpServer, ws bool, addr string, key string, dm string, serve bool, ec string, ds *types.Datasource, dev bool) {
+	isdev = dev
 	domain = dm
 	datasource = ds
 	edit_channel = ec
@@ -186,7 +186,7 @@ func render500(resp http.ResponseWriter, page *types.Page) {
 
 func serveAuth(resp http.ResponseWriter, req *http.Request) {
 	// this is used only for autoreload in dev
-	if config.Dev != true {
+	if isdev == false {
 		return
 	}
 	decoder := json.NewDecoder(req.Body)

@@ -26,7 +26,7 @@ func Init(dev bool, verbosity int, start bool) *terr.Trace {
 	instance := &http.Server{}
 	running := false
 	HttpServer = &types.HttpServer{Conf.Domain, Conf.Addr, instance, running}
-	httpServer.Init(HttpServer, Conf.Ws, Conf.WsAddr, Conf.WsKey, Conf.Domain, start, Conf.EditChan, Conf.Datasource)
+	httpServer.Init(HttpServer, Conf.Ws, Conf.WsAddr, Conf.WsKey, Conf.Domain, start, Conf.EditChan, Conf.Datasource, Conf.Dev)
 	// init ws cli
 	cli = centcom.NewClient(Conf.WsAddr, Conf.WsKey)
 	err := centcom.Connect(cli)
