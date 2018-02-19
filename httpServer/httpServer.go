@@ -16,10 +16,7 @@ import (
 	"html/template"
 	"net/http"
 	"os"
-	"path"
 	"path/filepath"
-	"runtime"
-	"strings"
 	"time"
 )
 
@@ -35,7 +32,6 @@ type authRequest struct {
 	Channels []string `json:channels`
 }
 
-var dir = getDir()
 var conn *types.Conn
 var key string
 var domain string
@@ -230,6 +226,7 @@ func startMsg(server *types.HttpServer) string {
 	return msg
 }
 
+/*
 func getDir() string {
 	_, filename, _, ok := runtime.Caller(0)
 	if !ok {
@@ -238,7 +235,7 @@ func getDir() string {
 	d := fmt.Sprintf("%s", path.Dir(filename))
 	d = strings.Replace(d, "/httpServer", "", -1)
 	return d
-}
+}*/
 
 func getTemplate(name string) string {
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))

@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"github.com/spf13/viper"
 	"github.com/synw/microb-http/types"
+	"github.com/synw/microb/libmicrob/events"
 	"github.com/synw/terr"
+	"os"
 	"path"
-	"runtime"
+	"path/filepath"
 )
 
 var Conf *types.Conf
@@ -21,9 +23,12 @@ func GetConf(dev bool) (*types.Conf, *terr.Trace) {
 }
 
 func getConfigPath() string {
-	_, filename, _, ok := runtime.Caller(0)
-	if !ok {
-		panic("No caller information")
+	filename, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		msg := "Can not find base directory"
+		tr := terr.New("conf.GetConfigPath", err)
+		events.New("error", "http", "conf.GetConfigPath", msg, tr)
+		return ""
 	}
 	cp := fmt.Sprintf("%s", path.Dir(filename))
 	return cp
