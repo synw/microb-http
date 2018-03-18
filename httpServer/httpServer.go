@@ -7,8 +7,8 @@ import (
 	"github.com/acmacalister/skittles"
 	"github.com/centrifugal/centrifuge-go"
 	"github.com/centrifugal/centrifugo/libcentrifugo/auth"
-	"github.com/pressly/chi"
-	"github.com/pressly/chi/middleware"
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 	"github.com/synw/microb-http/types"
 	"github.com/synw/microb/libmicrob/events"
 	"github.com/synw/terr"
@@ -16,6 +16,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -92,7 +93,7 @@ func Init(server *types.HttpServer, ws bool, addr string, key string, dm string,
 		return
 	}
 	// static
-	r.FileServer("/static", http.Dir(path))
+	fileServer(r, "/static", http.Dir(path))
 	// routes
 	r.Route("/centrifuge", func(r chi.Router) {
 		r.Post("/auth", serveAuth)
@@ -142,7 +143,38 @@ func ParseTemplates() {
 
 // internal methods
 
+func fileServer(r chi.Router, path string, root http.FileSystem) {
+	if strings.ContainsAny(path, "{}*") {
+		panic("FileServer does not permit URL parameters.")
+	}
+
+	fs := http.StripPrefix(path, http.FileServer(root))
+
+	if path != "/" && path[len(path)-1] != '/' {
+		r.Get(path, http.RedirectHandler(path+"/", 301).ServeHTTP)
+		path += "/"
+	}
+	path += "*"
+
+	r.Get(path, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fs.ServeHTTP(w, r)
+	}))
+}
+
+func handleRequest(req *http.Request) {
+	path := req.URL.Path
+	host := req.URL.Host
+	header := req.Header
+	ua := header["User-Agent"][0]
+	lang := header["Accept-Language"][0]
+	cl := header["ContentLength"]
+	fmt.Println(path, host)
+	fmt.Println(ua, lang, cl)
+}
+
 func serveRequest(resp http.ResponseWriter, req *http.Request) {
+	handleRequest(req)
+
 	url := req.URL.Path
 	status := http.StatusOK
 	resp = httpResponseWriter{resp, &status}
