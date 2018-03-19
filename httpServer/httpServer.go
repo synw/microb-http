@@ -9,13 +9,12 @@ import (
 	"github.com/centrifugal/centrifugo/libcentrifugo/auth"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/synw/microb-http/conf"
 	"github.com/synw/microb-http/types"
 	"github.com/synw/microb/libmicrob/events"
 	"github.com/synw/terr"
 	"html/template"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strings"
 	"time"
 )
@@ -38,6 +37,7 @@ var domain string
 var edit_channel string
 var datasource *types.Datasource
 var templates *template.Template
+var basePath string = conf.GetBasePath()
 
 func getToken(user string, timestamp string, secret string) string {
 	info := ""
@@ -54,14 +54,13 @@ func initWs(addr string, k string) {
 }
 
 func parseTemplates() (*template.Template, *terr.Trace) {
-	path, err := filepath.Abs(filepath.Dir(os.Args[0]))
-	path = path + "/templates/*"
-	if err != nil {
+	path := basePath + "/templates/*"
+	/*if err != nil {
 		msg := "Can not find templates directory"
 		tr := terr.New("httpServer.Stop", err)
 		events.New("error", "http", "httpServer.parseTemplates", msg, tr)
 		return nil, tr
-	}
+	}*/
 	tmps := template.Must(template.ParseGlob(path))
 	templates = tmps
 	return tmps, nil
@@ -84,14 +83,13 @@ func Init(server *types.HttpServer, ws bool, addr string, key string, dm string,
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.StripSlashes)
-	path, err := filepath.Abs(filepath.Dir(os.Args[0]))
-	path = path + "/static"
-	if err != nil {
+	path := basePath + "/static"
+	/*if err != nil {
 		msg := "Can not find static directory"
 		tr := terr.New("httpServer.Init", err)
 		events.New("error", "http", "httpServer.Init", msg, tr)
 		return
-	}
+	}*/
 	// static
 	fileServer(r, "/static", http.Dir(path))
 	// routes
@@ -270,10 +268,6 @@ func getDir() string {
 }*/
 
 func getTemplate(name string) string {
-	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
-	if err != nil {
-		panic("Error")
-	}
-	t := dir + "/templates/" + name + ".html"
+	t := basePath + "/templates/" + name + ".html"
 	return t
 }

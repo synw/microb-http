@@ -9,7 +9,7 @@ import (
 
 func StartHttpServer(server *types.HttpServer) *terr.Trace {
 	if server.Running == true {
-		err := errors.New("Dashboard server is already running")
+		err := errors.New("The http server is already running")
 		tr := terr.New("state.mutate.StartHttpServer", err)
 		return tr
 	}
@@ -19,7 +19,7 @@ func StartHttpServer(server *types.HttpServer) *terr.Trace {
 
 func StopHttpServer(server *types.HttpServer) *terr.Trace {
 	if server.Running == false {
-		err := errors.New("Dashboard server is not running")
+		err := errors.New("The http server is not running")
 		tr := terr.New("state.mutate.StopHttpServer", err)
 		return tr
 	}

@@ -11,36 +11,36 @@ import (
 
 var w = wa.New()
 
-func Start(path string, cli *centcom.Cli, channel string, verbosity int, dev bool) {
+func Start(basePath string, path string, cli *centcom.Cli, channel string, verbosity int, dev bool) {
 	iserr := false
-	if dev == true {
+	/*if dev == true {
 		_ = w.AddRecursive("../microb-http/templates")
 		_ = w.AddRecursive("../microb-http/static/js")
 		_ = w.AddRecursive("../microb-http/static/css")
 		_ = w.AddRecursive("../microb-http/static/content")
-	}
-	err := w.AddRecursive("templates")
+	}*/
+	err := w.AddRecursive(basePath + "/templates")
 	if err != nil {
 		tr := terr.New("wa.Start", err)
 		tr.Printf("start watcher")
 		events.Terr("http", "watcher.Start", "Error finding templates", tr)
 		iserr = true
 	}
-	err = w.AddRecursive("static/js")
+	err = w.AddRecursive(basePath + "/static/js")
 	if err != nil {
 		tr := terr.New("wa.Start", err)
 		tr.Printf("start watcher")
 		events.Terr("http", "watcher.Start", "Error finding static/js", tr)
 		iserr = true
 	}
-	err = w.AddRecursive("static/css")
+	err = w.AddRecursive(basePath + "/static/css")
 	if err != nil {
 		tr := terr.New("wa.Start", err)
 		tr.Printf("start watcher")
 		events.Terr("http", "watcher.Start", "Error finding static/css", tr)
 		iserr = true
 	}
-	err = w.AddRecursive("static/content")
+	err = w.AddRecursive(basePath + "/static/content")
 	if err != nil {
 		tr := terr.New("wa.Start", err)
 		tr.Printf("start watcher")

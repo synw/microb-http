@@ -14,15 +14,7 @@ import (
 
 var Conf *types.Conf
 
-func GetConf(dev bool) (*types.Conf, *terr.Trace) {
-	name := "normal"
-	if dev {
-		name = "dev"
-	}
-	return getConf(name)
-}
-
-func getConfigPath() string {
+func GetBasePath() string {
 	filename, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
 		msg := "Can not find base directory"
@@ -30,20 +22,14 @@ func getConfigPath() string {
 		events.New("error", "http", "conf.GetConfigPath", msg, tr)
 		return ""
 	}
-	cp := fmt.Sprintf("%s", path.Dir(filename))
+	cp := fmt.Sprintf("%s", path.Dir(filename)) + "/microb-http"
 	return cp
 }
 
-func getConf(name string) (*types.Conf, *terr.Trace) {
+func GetConf() (*types.Conf, *terr.Trace) {
 	// set some defaults for conf
-	dev := false
-	if name == "dev" {
-		viper.SetConfigName("http_dev_config")
-		dev = true
-	} else {
-		viper.SetConfigName("http_config")
-	}
-	cp := getConfigPath()
+	viper.SetConfigName("http_config")
+	cp := GetBasePath()
 	viper.AddConfigPath(cp)
 	viper.SetDefault("domain", "localhost")
 	viper.SetDefault("addr", "localhost:8080")
@@ -89,7 +75,7 @@ func getConf(name string) (*types.Conf, *terr.Trace) {
 	ec := "$edit_" + domain
 	viper.SetDefault("edit_channel", ec)
 	ech := viper.GetString("edit_channel")
-	conf := types.Conf{domain, addr, caddr, key, ws, datasource, ech, dev}
+	conf := types.Conf{domain, addr, caddr, key, ws, datasource, ech, true}
 	Conf = &conf
 	return &conf, nil
 }

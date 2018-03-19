@@ -15,9 +15,10 @@ import (
 var HttpServer = &types.HttpServer{}
 var Conf *types.Conf
 var cli *centcom.Cli
+var BasePath string = conf.GetBasePath()
 
 func Init(dev bool, verbosity int, start bool) *terr.Trace {
-	Conf, tr := conf.GetConf(dev)
+	Conf, tr := conf.GetConf()
 	if tr != nil {
 		events.Terr("http", "state.InitState", "Unable to init http server config", tr)
 		return tr
@@ -44,7 +45,7 @@ func Init(dev bool, verbosity int, start bool) *terr.Trace {
 		if verbosity > 1 {
 			fmt.Println("Initializing files watcher ...")
 		}
-		go watcher.Start(Conf.Datasource.Path, cli, Conf.EditChan, verbosity, dev)
+		go watcher.Start(BasePath, Conf.Datasource.Path, cli, Conf.EditChan, verbosity, dev)
 	}
 	return nil
 }
