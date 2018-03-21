@@ -1,13 +1,13 @@
 package state
 
 import (
-	"fmt"
 	"github.com/synw/centcom"
 	"github.com/synw/microb-http/conf"
 	"github.com/synw/microb-http/httpServer"
 	"github.com/synw/microb-http/types"
 	"github.com/synw/microb-http/watcher"
 	"github.com/synw/microb/libmicrob/events"
+	"github.com/synw/microb/libmicrob/msgs"
 	"github.com/synw/terr"
 	"net/http"
 )
@@ -17,7 +17,7 @@ var Conf *types.Conf
 var cli *centcom.Cli
 var BasePath string = conf.GetBasePath()
 
-func Init(dev bool, verbosity int, start bool) *terr.Trace {
+func Init(dev bool, start bool) *terr.Trace {
 	Conf, tr := conf.GetConf()
 	if tr != nil {
 		events.Terr("http", "state.InitState", "Unable to init http server config", tr)
@@ -42,10 +42,8 @@ func Init(dev bool, verbosity int, start bool) *terr.Trace {
 	}
 	// watcher for hot reload
 	if dev == true {
-		if verbosity > 1 {
-			fmt.Println("Initializing files watcher ...")
-		}
-		go watcher.Start(BasePath, Conf.Datasource.Path, cli, Conf.EditChan, verbosity, dev)
+		msgs.Status("Initializing files watcher")
+		go watcher.Start(BasePath, Conf.Datasource.Path, cli, Conf.EditChan)
 	}
 	return nil
 }

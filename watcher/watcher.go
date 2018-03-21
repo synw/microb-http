@@ -5,20 +5,15 @@ import (
 	wa "github.com/radovskyb/watcher"
 	"github.com/synw/centcom"
 	"github.com/synw/microb/libmicrob/events"
+	"github.com/synw/microb/libmicrob/msgs"
 	"github.com/synw/terr"
 	"time"
 )
 
 var w = wa.New()
 
-func Start(basePath string, path string, cli *centcom.Cli, channel string, verbosity int, dev bool) {
+func Start(basePath string, path string, cli *centcom.Cli, channel string) {
 	iserr := false
-	/*if dev == true {
-		_ = w.AddRecursive("../microb-http/templates")
-		_ = w.AddRecursive("../microb-http/static/js")
-		_ = w.AddRecursive("../microb-http/static/css")
-		_ = w.AddRecursive("../microb-http/static/content")
-	}*/
 	err := w.AddRecursive(basePath + "/templates")
 	if err != nil {
 		tr := terr.New("wa.Start", err)
@@ -48,20 +43,18 @@ func Start(basePath string, path string, cli *centcom.Cli, channel string, verbo
 		iserr = true
 	}
 	w.FilterOps(wa.Write, wa.Create, wa.Move, wa.Remove, wa.Rename)
-	if verbosity > 1 && iserr == false {
-		fmt.Println("Watching files :")
-		for path, f := range w.WatchedFiles() {
+	if iserr == false {
+		msgs.State("Dev mode is enabled: watching files for change")
+		/*for path, f := range w.WatchedFiles() {
 			fmt.Printf("%s %s\n", f.Name(), path)
-		}
+		}*/
 	}
 	// lauch listener
 	go func() {
 		for {
 			select {
 			case e := <-w.Event:
-				if verbosity > 2 {
-					fmt.Println("Change detected in", e.Path, "reloading")
-				}
+				fmt.Println("Change detected in", e.Path, "reloading")
 				handle(cli, channel)
 			case err := <-w.Error:
 				fmt.Println("Watcher error", err)

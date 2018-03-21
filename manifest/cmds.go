@@ -9,18 +9,40 @@ import (
 
 func getCmds() map[string]*types.Cmd {
 	cmds := make(map[string]*types.Cmd)
-	cmds["http"] = http()
+	cmds["start"] = start()
 	return cmds
 }
 
-func initService() error {
-	tr := state.Init(true, 1, true)
+func initService(dev bool, start bool) error {
+	tr := state.Init(dev, start)
 	if tr != nil {
 		return tr.ToErr()
 	}
 	return nil
 }
 
+func start() *types.Cmd {
+	cmd := &types.Cmd{Name: "start", Service: "http", Exec: runStart}
+	return cmd
+}
+
+func runStart(cmd *types.Cmd, c chan *types.Cmd, args ...interface{}) {
+	server := state.HttpServer
+	tr := mutate.StartHttpServer(server)
+	if tr != nil {
+		cmd.Trace = tr
+		cmd.Status = "error"
+		events.Terr("http", "cmd.Start", "Error starting http service", tr)
+		c <- cmd
+	}
+	var resp []interface{}
+	resp = append(resp, "Http server started")
+	cmd.Status = "success"
+	cmd.ReturnValues = resp
+	c <- cmd
+}
+
+/*
 func http() *types.Cmd {
 	cmd := &types.Cmd{Name: "http", Exec: runHttp}
 	return cmd
@@ -57,20 +79,4 @@ func runHttp(cmd *types.Cmd, c chan *types.Cmd, args ...interface{}) {
 		cmd.ReturnValues = resp
 	}
 	c <- cmd
-}
-
-/*
-func start_(cmd *types.Cmd, server *httpTypes.HttpServer) *types.Cmd {
-	tr := mutate.StartHttpServer(server)
-	if tr != nil {
-		cmd.Trace = tr
-		cmd.Status = "error"
-		events.Terr("http", "cmd.Start", "Error starting http service", tr)
-		return cmd
-	}
-	var resp []interface{}
-	resp = append(resp, "Http server started")
-	cmd.Status = "success"
-	cmd.ReturnValues = resp
-	return cmd
 }*/

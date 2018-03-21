@@ -46,7 +46,7 @@ func GetConf() (*types.Conf, *terr.Trace) {
 			tr := terr.New("conf.getConf", er)
 			return conf, tr
 		default:
-			err := errors.New("Unable to locate config file")
+			err := errors.New("Unable to locate config file at path " + cp)
 			tr := terr.New("conf.getConf", err)
 			return conf, tr
 		}

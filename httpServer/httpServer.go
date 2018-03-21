@@ -84,12 +84,6 @@ func Init(server *types.HttpServer, ws bool, addr string, key string, dm string,
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.StripSlashes)
 	path := basePath + "/static"
-	/*if err != nil {
-		msg := "Can not find static directory"
-		tr := terr.New("httpServer.Init", err)
-		events.New("error", "http", "httpServer.Init", msg, tr)
-		return
-	}*/
 	// static
 	fileServer(r, "/static", http.Dir(path))
 	// routes
@@ -160,14 +154,14 @@ func fileServer(r chi.Router, path string, root http.FileSystem) {
 }
 
 func handleRequest(req *http.Request) {
-	path := req.URL.Path
+	/*path := req.URL.Path
 	host := req.URL.Host
 	header := req.Header
 	ua := header["User-Agent"][0]
 	lang := header["Accept-Language"][0]
 	cl := header["ContentLength"]
 	fmt.Println(path, host)
-	fmt.Println(ua, lang, cl)
+	fmt.Println(ua, lang, cl)*/
 }
 
 func serveRequest(resp http.ResponseWriter, req *http.Request) {
@@ -181,6 +175,7 @@ func serveRequest(resp http.ResponseWriter, req *http.Request) {
 		events.Terr("http", "httpServer.serveRequest", "Error retrieving page", tr)
 		p := &types.Page{}
 		render404(resp, p)
+		tr.Print()
 		return
 	}
 	renderTemplate(resp, page)
@@ -255,17 +250,6 @@ func startMsg(server *types.HttpServer) string {
 	msg = "Http server started at " + server.Addr + " for domain " + skittles.BoldWhite(server.Domain)
 	return msg
 }
-
-/*
-func getDir() string {
-	_, filename, _, ok := runtime.Caller(0)
-	if !ok {
-		panic("No caller information")
-	}
-	d := fmt.Sprintf("%s", path.Dir(filename))
-	d = strings.Replace(d, "/httpServer", "", -1)
-	return d
-}*/
 
 func getTemplate(name string) string {
 	t := basePath + "/templates/" + name + ".html"
