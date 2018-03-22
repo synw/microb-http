@@ -109,7 +109,6 @@ func Init(server *types.HttpServer, ws bool, addr string, key string, dm string,
 
 func Run(server *types.HttpServer) {
 	events.New("state", "http", "httpServer.Run", startMsg(server), nil)
-	server.Running = true
 	server.Instance.ListenAndServe()
 }
 
@@ -124,7 +123,6 @@ func Stop(server *types.HttpServer) *terr.Trace {
 		events.New("error", "http", "httpServer.Stop", stopMsg(), tr)
 		return tr
 	}
-	server.Running = false
 	events.New("state", "http", "httpServer.Stop", stopMsg(), nil)
 	return nil
 }

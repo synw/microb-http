@@ -1,6 +1,7 @@
 package state
 
 import (
+	"github.com/looplab/fsm"
 	"github.com/synw/centcom"
 	"github.com/synw/microb-http/conf"
 	"github.com/synw/microb-http/httpServer"
@@ -25,8 +26,8 @@ func Init(dev bool, start bool) *terr.Trace {
 	}
 	// htto server
 	instance := &http.Server{}
-	running := false
-	HttpServer = &types.HttpServer{Conf.Domain, Conf.Addr, instance, running}
+	var st *fsm.FSM
+	HttpServer = &types.HttpServer{Conf.Domain, Conf.Addr, instance, st}
 	httpServer.Init(HttpServer, Conf.Ws, Conf.WsAddr, Conf.WsKey, Conf.Domain, start, Conf.EditChan, Conf.Datasource, Conf.Dev)
 	// init ws cli
 	cli = centcom.NewClient(Conf.WsAddr, Conf.WsKey)
@@ -40,10 +41,24 @@ func Init(dev bool, start bool) *terr.Trace {
 		tr := terr.New("state.Init", err)
 		return tr
 	}
+	// initialize the state machine
+	HttpServer.State = setState()
 	// watcher for hot reload
 	if dev == true {
 		msgs.Status("Initializing files watcher")
 		go watcher.Start(BasePath, Conf.Datasource.Path, cli, Conf.EditChan)
 	}
 	return nil
+}
+
+func setState() *fsm.FSM {
+	st := fsm.NewFSM(
+		"stop",
+		fsm.Events{
+			{Name: "start", Src: []string{"stop"}, Dst: "start"},
+			{Name: "stop", Src: []string{"start"}, Dst: "stop"},
+		},
+		fsm.Callbacks{},
+	)
+	return st
 }

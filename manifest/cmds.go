@@ -1,15 +1,20 @@
 package manifest
 
 import (
+	"errors"
 	"github.com/synw/microb-http/state"
 	"github.com/synw/microb-http/state/mutate"
-	"github.com/synw/microb/libmicrob/events"
+	//"github.com/synw/microb/libmicrob/events"
+	//"github.com/synw/microb/libmicrob/msgs"
 	"github.com/synw/microb/libmicrob/types"
+	"github.com/synw/terr"
 )
 
 func getCmds() map[string]*types.Cmd {
 	cmds := make(map[string]*types.Cmd)
 	cmds["start"] = start()
+	cmds["stop"] = stop()
+	cmds["status"] = status()
 	return cmds
 }
 
@@ -21,22 +26,86 @@ func initService(dev bool, start bool) error {
 	return nil
 }
 
+func status() *types.Cmd {
+	cmd := &types.Cmd{Name: "status", Service: "http", Exec: runStatus}
+	return cmd
+}
+
+func runStatus(cmd *types.Cmd, c chan *types.Cmd) {
+	var resp []interface{}
+	var msg string
+	if state.HttpServer.State.Current() == "start" {
+		msg = "The http server is running"
+	} else {
+		msg = "The http server is not running"
+	}
+	resp = append(resp, msg)
+	cmd.Status = "success"
+	cmd.ReturnValues = resp
+	c <- cmd
+}
+
 func start() *types.Cmd {
 	cmd := &types.Cmd{Name: "start", Service: "http", Exec: runStart}
 	return cmd
 }
 
-func runStart(cmd *types.Cmd, c chan *types.Cmd, args ...interface{}) {
+func runStart(cmd *types.Cmd, c chan *types.Cmd) {
 	server := state.HttpServer
+	if state.HttpServer.State.Current() == "start" {
+		msg := "The http server is already started"
+		err := errors.New(msg)
+		tr := terr.New("runStart", err)
+		//events.Terr("http", "cmd.runStart", msg, tr)
+		cmd.Status = "error"
+		cmd.Trace = tr
+		c <- cmd
+		return
+	}
 	tr := mutate.StartHttpServer(server)
 	if tr != nil {
-		cmd.Trace = tr
+		msg := "Error starting http service"
+		//events.Terr("http", "cmd.runStart", msg, tr)
 		cmd.Status = "error"
-		events.Terr("http", "cmd.Start", "Error starting http service", tr)
+		cmd.ErrMsg = msg
+		cmd.Trace = tr
 		c <- cmd
+		return
 	}
 	var resp []interface{}
 	resp = append(resp, "Http server started")
+	cmd.Status = "success"
+	cmd.ReturnValues = resp
+	c <- cmd
+}
+
+func stop() *types.Cmd {
+	cmd := &types.Cmd{Name: "stop", Service: "http", Exec: runStop}
+	return cmd
+}
+
+func runStop(cmd *types.Cmd, c chan *types.Cmd) {
+	server := state.HttpServer
+	if state.HttpServer.State.Current() == "stop" {
+		msg := "The http server is not running"
+		err := errors.New(msg)
+		tr := terr.New("runStop", err)
+		cmd.Status = "error"
+		cmd.Trace = tr
+		c <- cmd
+		return
+	}
+	tr := mutate.StopHttpServer(server)
+	if tr != nil {
+		msg := "Error stoping http service"
+		cmd.Status = "error"
+		cmd.ErrMsg = msg
+		cmd.Trace = tr
+		c <- cmd
+		return
+	}
+	var resp []interface{}
+	resp = append(resp, "Http server stopped")
 	cmd.Status = "success"
 	cmd.ReturnValues = resp
 	c <- cmd

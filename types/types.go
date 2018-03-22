@@ -1,6 +1,7 @@
 package types
 
 import (
+	"github.com/looplab/fsm"
 	"html/template"
 	"net/http"
 )
@@ -9,7 +10,7 @@ type HttpServer struct {
 	Domain   string
 	Addr     string
 	Instance *http.Server
-	Running  bool
+	State    *fsm.FSM
 }
 
 type Datasource struct {
