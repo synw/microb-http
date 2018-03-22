@@ -10,6 +10,11 @@ import (
 )
 
 func getPage(domain string, url string, conn *types.Conn, edit_channel string) (*types.Page, *terr.Trace) {
+	terr.Debug("URL", url)
+	// remove eventual trailing slash
+	if strings.HasSuffix(url, "/") {
+		url = url[:len(url)-1]
+	}
 	filepath := basePath + "/static/content/" + getFilepath(url)
 	title, content, tr := getContent(filepath)
 	if tr != nil {
@@ -18,7 +23,7 @@ func getPage(domain string, url string, conn *types.Conn, edit_channel string) (
 		return p, tr
 	}
 	page := &types.Page{domain, url, title, template.HTML(content), conn, edit_channel}
-	terr.Debug(page)
+	//terr.Debug(page)
 	return page, nil
 }
 
@@ -73,5 +78,7 @@ func getFilepath(url string) string {
 		}
 		addr = path + "/" + file
 	}
+	terr.Debug(addr)
+
 	return addr
 }
