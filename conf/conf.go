@@ -2,27 +2,34 @@ package conf
 
 import (
 	"errors"
-	"fmt"
+	//"fmt"
 	"github.com/spf13/viper"
 	"github.com/synw/microb-http/types"
-	"github.com/synw/microb/libmicrob/events"
+	//"github.com/synw/microb/libmicrob/events"
 	"github.com/synw/terr"
 	"os"
-	"path"
+	//"path"
 	"path/filepath"
 )
 
 var Conf *types.Conf
 
 func GetBasePath() string {
-	filename, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	ex, err := os.Executable()
 	if err != nil {
-		msg := "Can not find base directory"
-		tr := terr.New("conf.GetConfigPath", err)
-		events.New("error", "http", "conf.GetConfigPath", msg, tr)
-		return ""
+		panic(err)
 	}
-	cp := fmt.Sprintf("%s", path.Dir(filename)) + "/microb-http"
+	cp := filepath.Dir(ex)
+	/*
+		filename, err := filepath.Abs(filepath.Dir(os.Args[0]))
+		if err != nil {
+			msg := "Can not find base directory"
+			tr := terr.New("conf.GetConfigPath", err)
+			events.New("error", "http", "conf.GetConfigPath", msg, tr)
+			return ""
+		}
+		cp := fmt.Sprintf("%s", path.Dir(filename)) + "/microb-http"
+	*/
 	return cp
 }
 
@@ -30,7 +37,8 @@ func GetConf() (*types.Conf, *terr.Trace) {
 	// set some defaults for conf
 	viper.SetConfigName("http_config")
 	cp := GetBasePath()
-	viper.AddConfigPath(cp)
+	//viper.AddConfigPath(cp)
+	//viper.AddConfigPath(".")
 	viper.SetDefault("domain", "localhost")
 	viper.SetDefault("addr", "localhost:8080")
 	viper.SetDefault("centrifugo_addr", "localhost:8001")
