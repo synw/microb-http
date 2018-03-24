@@ -14,6 +14,9 @@ func getPage(domain string, url string, conn *types.Conn, edit_channel string) (
 	if strings.HasSuffix(url, "/") {
 		url = url[:len(url)-1]
 	}
+	if url == "" {
+		url = "/index"
+	}
 	filepath := basePath + "/static/content/" + getFilepath(url)
 	title, content, tr := getContent(filepath)
 	if tr != nil {

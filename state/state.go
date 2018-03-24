@@ -5,6 +5,7 @@ import (
 	"github.com/synw/centcom"
 	"github.com/synw/microb-http/conf"
 	"github.com/synw/microb-http/httpServer"
+	"github.com/synw/microb-http/state/mutate"
 	"github.com/synw/microb-http/types"
 	"github.com/synw/microb-http/watcher"
 	"github.com/synw/microb/libmicrob/events"
@@ -21,14 +22,15 @@ var BasePath string = conf.GetBasePath()
 func Init(dev bool, start bool) *terr.Trace {
 	Conf, tr := conf.GetConf()
 	if tr != nil {
-		events.Terr("http", "state.InitState", "Unable to init http server config", tr)
+		tr := terr.Pass("state.Init", tr)
+		events.Error("http", "Unable to init http server config", tr)
 		return tr
 	}
 	// htto server
 	instance := &http.Server{}
 	var st *fsm.FSM
 	HttpServer = &types.HttpServer{Conf.Domain, Conf.Addr, instance, st}
-	httpServer.Init(HttpServer, Conf.Ws, Conf.WsAddr, Conf.WsKey, Conf.Domain, start, Conf.EditChan, Conf.Datasource, Conf.Dev)
+	httpServer.Init(HttpServer, Conf.Ws, Conf.WsAddr, Conf.WsKey, Conf.Domain, Conf.EditChan, Conf.Datasource, Conf.Dev)
 	// init ws cli
 	cli = centcom.NewClient(Conf.WsAddr, Conf.WsKey)
 	err := centcom.Connect(cli)
@@ -43,6 +45,13 @@ func Init(dev bool, start bool) *terr.Trace {
 	}
 	// initialize the state machine
 	HttpServer.State = setState()
+	if start == true {
+		tr := mutate.StartHttpServer(HttpServer)
+		if tr != nil {
+			tr := terr.New("state.Init", err)
+			return tr
+		}
+	}
 	// watcher for hot reload
 	if dev == true {
 		msgs.Status("Initializing files watcher")

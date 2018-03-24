@@ -1,7 +1,6 @@
 package watcher
 
 import (
-	"fmt"
 	wa "github.com/radovskyb/watcher"
 	"github.com/synw/centcom"
 	"github.com/synw/microb/libmicrob/events"
@@ -16,30 +15,26 @@ func Start(basePath string, path string, cli *centcom.Cli, channel string) {
 	iserr := false
 	err := w.AddRecursive(basePath + "/templates")
 	if err != nil {
-		tr := terr.New("wa.Start", err)
-		tr.Printf("start watcher")
-		events.Terr("http", "watcher.Start", "Error finding templates", tr)
+		tr := terr.New("watcher.Start", err)
+		events.Error("http", "Error finding templates", tr)
 		iserr = true
 	}
 	err = w.AddRecursive(basePath + "/static/js")
 	if err != nil {
-		tr := terr.New("wa.Start", err)
-		tr.Printf("start watcher")
-		events.Terr("http", "watcher.Start", "Error finding static/js", tr)
+		tr := terr.New("watcher.Start", err)
+		events.Error("http", "Error finding static/js", tr)
 		iserr = true
 	}
 	err = w.AddRecursive(basePath + "/static/css")
 	if err != nil {
-		tr := terr.New("wa.Start", err)
-		tr.Printf("start watcher")
-		events.Terr("http", "watcher.Start", "Error finding static/css", tr)
+		tr := terr.New("watcher.Start", err)
+		events.Error("http", "Error finding static/css", tr)
 		iserr = true
 	}
 	err = w.AddRecursive(basePath + "/static/content")
 	if err != nil {
-		tr := terr.New("wa.Start", err)
-		tr.Printf("start watcher")
-		events.Terr("http", "watcher.Start", "Error finding static/content", tr)
+		tr := terr.New("watcher.Start", err)
+		events.Error("http", "Error finding static/content", tr)
 		iserr = true
 	}
 	w.FilterOps(wa.Write, wa.Create, wa.Move, wa.Remove, wa.Rename)
@@ -54,12 +49,12 @@ func Start(basePath string, path string, cli *centcom.Cli, channel string) {
 		for {
 			select {
 			case e := <-w.Event:
-				fmt.Println("Change detected in", e.Path, "reloading")
+				msgs.Msg("Change detected in " + e.Path + ": reloading")
 				handle(cli, channel)
 			case err := <-w.Error:
-				fmt.Println("Watcher error", err)
+				msgs.Msg("Watcher error " + err.Error())
 			case <-w.Closed:
-				fmt.Println("Watcher closed")
+				msgs.Msg("Watcher closed")
 				return
 			}
 		}
@@ -68,8 +63,7 @@ func Start(basePath string, path string, cli *centcom.Cli, channel string) {
 	err = w.Start(time.Millisecond * 200)
 	if err != nil {
 		tr := terr.New("watcher.Start", err)
-		tr.Printf("start watcher")
-		events.Terr("http", "watcher.Start", "Error starting the watcher", tr)
+		events.Error("http", "Error starting the watcher", tr)
 	}
 }
 

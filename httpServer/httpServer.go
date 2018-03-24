@@ -3,6 +3,7 @@ package httpServer
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/acmacalister/skittles"
 	"github.com/centrifugal/centrifuge-go"
@@ -66,7 +67,7 @@ func parseTemplates() (*template.Template, *terr.Trace) {
 	return tmps, nil
 }
 
-func Init(server *types.HttpServer, ws bool, addr string, key string, dm string, serve bool, ec string, ds *types.Datasource, dev bool) {
+func Init(server *types.HttpServer, ws bool, addr string, key string, dm string, ec string, ds *types.Datasource, dev bool) {
 	isdev = dev
 	domain = dm
 	datasource = ds
@@ -101,14 +102,10 @@ func Init(server *types.HttpServer, ws bool, addr string, key string, dm string,
 		Handler:      r,
 	}
 	server.Instance = httpServer
-	// run
-	if serve == true {
-		go Run(server)
-	}
 }
 
 func Run(server *types.HttpServer) {
-	events.New("state", "http", "httpServer.Run", startMsg(server), nil)
+	events.State("http", startMsg(server))
 	server.Instance.ListenAndServe()
 }
 
@@ -120,10 +117,10 @@ func Stop(server *types.HttpServer) *terr.Trace {
 	err := srv.Shutdown(ctx)
 	if err != nil {
 		tr := terr.New("httpServer.Stop", err)
-		events.New("error", "http", "httpServer.Stop", stopMsg(), tr)
+		events.Error("http", stopMsg(), tr)
 		return tr
 	}
-	events.New("state", "http", "httpServer.Stop", stopMsg(), nil)
+	events.State("http", stopMsg())
 	return nil
 }
 
@@ -170,7 +167,8 @@ func serveRequest(resp http.ResponseWriter, req *http.Request) {
 	resp = httpResponseWriter{resp, &status}
 	page, tr := getPage(domain, url, conn, edit_channel)
 	if tr != nil {
-		events.Terr("http", "httpServer.serveRequest", "Error retrieving page", tr)
+		tr = terr.Pass("serveRequest", tr)
+		events.Error("http", "Error retrieving page", tr)
 		p := &types.Page{}
 		render404(resp, p)
 		tr.Print()
@@ -185,7 +183,9 @@ func renderTemplate(resp http.ResponseWriter, page *types.Page) {
 	if err != nil {
 		http.Error(resp, err.Error(), http.StatusInternalServerError)
 		msg := "Error rendering template"
-		events.Err("http", "httpServer.renderTemplate", msg, err)
+		err := errors.New("Can not render template")
+		tr := terr.New("httpServer.renderTemplate", err)
+		events.Error("http", msg, tr)
 	}
 }
 
@@ -194,7 +194,9 @@ func render404(resp http.ResponseWriter, page *types.Page) {
 	if err != nil {
 		http.Error(resp, err.Error(), http.StatusInternalServerError)
 		msg := "Error rendering 404"
-		events.Err("http", "httpServer.render404", msg, err)
+		err := errors.New(msg)
+		tr := terr.New("httpServer.render400", err)
+		events.Error("http", msg, tr)
 	}
 }
 
@@ -203,7 +205,9 @@ func render500(resp http.ResponseWriter, page *types.Page) {
 	if err != nil {
 		http.Error(resp, err.Error(), http.StatusInternalServerError)
 		msg := "Error rendering 500"
-		events.Err("http", "httpServer.render500", msg, err)
+		err := errors.New(msg)
+		tr := terr.New("httpServer.render500", err)
+		events.Error("http", msg, tr)
 	}
 }
 
@@ -217,7 +221,9 @@ func serveAuth(resp http.ResponseWriter, req *http.Request) {
 	err := decoder.Decode(&data)
 	if err != nil {
 		msg := "Error decoding data"
-		events.Err("http", "httpServer.serveAuth", msg, err)
+		err := errors.New(msg)
+		tr := terr.New("httpServer.serveAuth", err)
+		events.Error("http", msg, tr)
 	}
 	r := map[string]map[string]string{}
 	for _, channel := range data.Channels {
@@ -233,7 +239,10 @@ func serveAuth(resp http.ResponseWriter, req *http.Request) {
 	resp.Header().Set("Content-Type", "application/json")
 	json_bytes, err := json.Marshal(r)
 	if err != nil {
-		fmt.Println(err)
+		msg := "Can not marshall json"
+		err := errors.New(msg)
+		tr := terr.New("httpServer.serveAuth", err)
+		events.Error("http", msg, tr)
 	}
 	fmt.Fprintf(resp, "%s\n", json_bytes)
 }
