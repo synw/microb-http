@@ -168,7 +168,7 @@ func serveRequest(resp http.ResponseWriter, req *http.Request) {
 	page, tr := getPage(domain, url, conn, edit_channel)
 	if tr != nil {
 		tr = terr.Pass("serveRequest", tr)
-		events.Error("http", "Error retrieving page", tr)
+		events.Error("http", "Error retrieving page "+url, tr, "warn")
 		p := &types.Page{}
 		render404(resp, p)
 		tr.Print()
