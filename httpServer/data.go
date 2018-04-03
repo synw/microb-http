@@ -24,7 +24,7 @@ func getPage(domain string, url string, conn *types.Conn, edit_channel string) (
 		var p *types.Page
 		return p, tr
 	}
-	page := &types.Page{domain, url, title, template.HTML(content), conn, edit_channel}
+	page := &types.Page{domain, url, title, template.HTML(content), conn, edit_channel, ""}
 	return page, nil
 }
 
@@ -40,7 +40,14 @@ func getContent(filepath string) (string, string, *terr.Trace) {
 	content := ""
 	for scanner.Scan() {
 		if line == 1 {
-			title = scanner.Text()
+			firstLine := scanner.Text()
+			prefix := "<!-- Title:"
+			if strings.HasPrefix(firstLine, prefix) {
+				title = firstLine
+				title = strings.Replace(title, prefix, "", -1)
+				suffix := " -->"
+				title = strings.Replace(title, suffix, "", -1)
+			}
 		} else {
 			content = content + scanner.Text()
 		}

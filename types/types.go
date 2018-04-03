@@ -31,6 +31,8 @@ type Conf struct {
 	Datasource *Datasource
 	EditChan   string
 	Dev        bool
+	Mail       bool
+	CsrfKey    string
 }
 
 type Conn struct {
@@ -47,4 +49,5 @@ type Page struct {
 	Content  template.HTML
 	Conn     *Conn
 	EditChan string
+	Token    string
 }

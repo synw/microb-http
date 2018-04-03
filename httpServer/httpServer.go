@@ -12,6 +12,7 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/synw/microb-http/conf"
 	"github.com/synw/microb-http/types"
+	"github.com/synw/microb-mail/mail"
 	"github.com/synw/microb/libmicrob/events"
 	"github.com/synw/terr"
 	"html/template"
@@ -39,6 +40,7 @@ var edit_channel string
 var datasource *types.Datasource
 var templates *template.Template
 var basePath string = conf.GetBasePath()
+var csrfKey string
 
 func getToken(user string, timestamp string, secret string) string {
 	info := ""
@@ -56,22 +58,16 @@ func initWs(addr string, k string) {
 
 func parseTemplates() (*template.Template, *terr.Trace) {
 	path := basePath + "/templates/*"
-	/*if err != nil {
-		msg := "Can not find templates directory"
-		tr := terr.New("httpServer.Stop", err)
-		events.New("error", "http", "httpServer.parseTemplates", msg, tr)
-		return nil, tr
-	}*/
 	tmps := template.Must(template.ParseGlob(path))
 	templates = tmps
 	return tmps, nil
 }
 
-func Init(server *types.HttpServer, ws bool, addr string, key string, dm string, ec string, ds *types.Datasource, dev bool) {
-	isdev = dev
+func Init(server *types.HttpServer, ws bool, addr string, key string, dm string, ec string, ds *types.Datasource, isDev bool, isMail bool, icsrfKey string) {
 	domain = dm
 	datasource = ds
 	edit_channel = ec
+	csrfKey = icsrfKey
 	if ws {
 		initWs(addr, key)
 	}
@@ -88,9 +84,18 @@ func Init(server *types.HttpServer, ws bool, addr string, key string, dm string,
 	// static
 	fileServer(r, "/static", http.Dir(path))
 	// routes
+	// mail service
+	if isMail == true {
+		r.Route("/mail", func(r chi.Router) {
+			r.Post("/post", mail.ProcessMailForm)
+			r.Get("/", mail.ServeMailForm)
+		})
+	}
+	// authentication for command channel
 	r.Route("/centrifuge", func(r chi.Router) {
 		r.Post("/auth", serveAuth)
 	})
+	// pages
 	r.Route("/", func(r chi.Router) {
 		r.Get("/*", serveRequest)
 	})
@@ -106,7 +111,7 @@ func Init(server *types.HttpServer, ws bool, addr string, key string, dm string,
 
 func Run(server *types.HttpServer) {
 	events.State("http", startMsg(server))
-	server.Instance.ListenAndServe()
+	http.ListenAndServe(":8080", server.Instance.Handler)
 }
 
 func Stop(server *types.HttpServer) *terr.Trace {
@@ -161,7 +166,6 @@ func handleRequest(req *http.Request) {
 
 func serveRequest(resp http.ResponseWriter, req *http.Request) {
 	handleRequest(req)
-
 	url := req.URL.Path
 	status := http.StatusOK
 	resp = httpResponseWriter{resp, &status}
@@ -182,7 +186,7 @@ func renderTemplate(resp http.ResponseWriter, page *types.Page) {
 	err := templates.ExecuteTemplate(resp, "index.html", page)
 	if err != nil {
 		http.Error(resp, err.Error(), http.StatusInternalServerError)
-		msg := "Error rendering template"
+		msg := "Error rendering template: " + err.Error()
 		err := errors.New("Can not render template")
 		tr := terr.New("httpServer.renderTemplate", err)
 		events.Error("http", msg, tr)

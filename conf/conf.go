@@ -43,6 +43,7 @@ func GetConf() (*types.Conf, *terr.Trace) {
 	viper.SetDefault("addr", "localhost:8080")
 	viper.SetDefault("centrifugo_addr", "localhost:8001")
 	viper.SetDefault("websockets", false)
+	viper.SetDefault("mail", false)
 	viper.SetDefault("datasource", map[string]interface{}{})
 	// get the actual conf
 	err := viper.ReadInConfig()
@@ -64,6 +65,8 @@ func GetConf() (*types.Conf, *terr.Trace) {
 	caddr := viper.GetString("centrifugo_addr")
 	key := viper.GetString("centrifugo_key")
 	ws := viper.Get("websockets").(bool)
+	mail := viper.Get("mail").(bool)
+	csrfKey := viper.Get("csrf_key").(string)
 	ds := viper.Get("datasource").(map[string]interface{})
 	datasource := &types.Datasource{}
 	for k, v := range ds {
@@ -83,7 +86,7 @@ func GetConf() (*types.Conf, *terr.Trace) {
 	ec := "$edit_" + domain
 	viper.SetDefault("edit_channel", ec)
 	ech := viper.GetString("edit_channel")
-	conf := types.Conf{domain, addr, caddr, key, ws, datasource, ech, true}
+	conf := types.Conf{domain, addr, caddr, key, ws, datasource, ech, true, mail, csrfKey}
 	Conf = &conf
 	return &conf, nil
 }
