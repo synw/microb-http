@@ -14,7 +14,6 @@ import (
 	"github.com/synw/microb-http/types"
 	"github.com/synw/microb-mail/mail"
 	"github.com/synw/microb/libmicrob/events"
-	"github.com/synw/microb/libmicrob/msgs"
 	"github.com/synw/terr"
 	"html/template"
 	"net/http"
