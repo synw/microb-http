@@ -2,5 +2,7 @@
 	"centrifugo_addr":"localhost:8001",
 	"centrifugo_key":"secret_key",
 	"domain": "localhost",
-	"addr":"localhost:8080"
+	"addr":"localhost:8080",
+	"mail":true,
+	"csrf_key":"297fcbbb-2b24-4262-b6f7-817e0983fbb7"
 }
