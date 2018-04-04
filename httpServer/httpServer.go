@@ -41,7 +41,7 @@ type authRequest struct {
 	Channels []string `json:channels`
 }
 
-func Init(server *types.HttpServer, ws bool, addr string, key string, dm string, ec string, ds *types.Datasource, isDev bool, isMail bool, icsrfKey string) {
+func Init(server *types.HttpServer, ws bool, addr string, key string, dm string, ec string, ds *types.Datasource, isDev bool, isMail bool, icsrfKey string, hitsDb string) {
 	domain = dm
 	datasource = ds
 	edit_channel = ec
@@ -62,6 +62,8 @@ func Init(server *types.HttpServer, ws bool, addr string, key string, dm string,
 	path := basePath + "/static"
 	// static
 	fileServer(r, "/static", http.Dir(path))
+	// init hits db
+	initDb(hitsDb, domain)
 	// routes
 	// mail service
 	if isMail == true {
@@ -79,7 +81,7 @@ func Init(server *types.HttpServer, ws bool, addr string, key string, dm string,
 	r.Route("/", func(r chi.Router) {
 		r.Get("/*", serveRequest)
 	})
-	// init
+	// init http
 	httpServer := &http.Server{
 		Addr:         server.Addr,
 		ReadTimeout:  5 * time.Second,
@@ -151,29 +153,17 @@ func fileServer(r chi.Router, path string, root http.FileSystem) {
 	}))
 }
 
-func handleRequest(r *http.Request) {
-	/*path := r.URL.Path
-	host := r.URL.Host
-	header := r.Header
-	ua := header["User-Agent"][0]
-	lang := header["Accept-Language"][0]
-	cl := header["ContentLength"]
-	fmt.Println(path, host)
-	fmt.Println(ua, lang, cl)*/
-}
-
 func serveRequest(resp http.ResponseWriter, r *http.Request) {
-	handleRequest(r)
 	url := r.URL.Path
 	status := http.StatusOK
 	resp = httpResponseWriter{resp, &status}
+	go processHit(r, status)
 	page, tr := getPage(domain, url, conn, edit_channel)
 	if tr != nil {
 		tr = terr.Pass("serveRequest", tr)
 		events.Error("http", "Error retrieving page "+url, tr, "warn")
 		p := &types.Page{}
 		render404(resp, p)
-		tr.Print()
 		return
 	}
 	renderTemplate(resp, page)

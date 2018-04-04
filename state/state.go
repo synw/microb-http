@@ -29,7 +29,7 @@ func Init(dev bool, start bool) *terr.Trace {
 	instance := &http.Server{}
 	var st *fsm.FSM
 	HttpServer = &types.HttpServer{Conf.Domain, Conf.Addr, instance, st}
-	httpServer.Init(HttpServer, Conf.Ws, Conf.WsAddr, Conf.WsKey, Conf.Domain, Conf.EditChan, Conf.Datasource, Conf.Dev, Conf.Mail, Conf.CsrfKey)
+	httpServer.Init(HttpServer, Conf.Ws, Conf.WsAddr, Conf.WsKey, Conf.Domain, Conf.EditChan, Conf.Datasource, Conf.Dev, Conf.Mail, Conf.CsrfKey, Conf.HitsDbAddr)
 	// init ws cli
 	cli = centcom.NewClient(Conf.WsAddr, Conf.WsKey)
 	err := centcom.Connect(cli)

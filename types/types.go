@@ -1,6 +1,7 @@
 package types
 
 import (
+	"github.com/jinzhu/gorm"
 	"github.com/looplab/fsm"
 	"html/template"
 	"net/http"
@@ -33,6 +34,7 @@ type Conf struct {
 	Dev        bool
 	Mail       bool
 	CsrfKey    string
+	HitsDbAddr string
 }
 
 type Conn struct {
@@ -40,6 +42,17 @@ type Conn struct {
 	Timestamp string
 	User      string
 	Token     string
+}
+
+type Hit struct {
+	gorm.Model
+	Ip     string `json:ip`
+	Path   string `json:path`
+	Host   string `json:host`
+	Ua     string `json:ua`
+	Lang   string `json:lang`
+	Length string `json:length`
+	Status int    `json:status`
 }
 
 type Page struct {
