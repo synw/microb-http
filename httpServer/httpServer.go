@@ -14,6 +14,7 @@ import (
 	"github.com/synw/microb-http/types"
 	"github.com/synw/microb-mail/mail"
 	"github.com/synw/microb/libmicrob/events"
+	"github.com/synw/microb/libmicrob/msgs"
 	"github.com/synw/terr"
 	"html/template"
 	"net/http"
@@ -21,7 +22,15 @@ import (
 	"time"
 )
 
-var isdev = false
+var dev bool
+var conn *types.Conn
+var key string
+var domain string
+var edit_channel string
+var datasource *types.Datasource
+var templates *template.Template
+var basePath string = conf.GetBasePath()
+var csrfKey string
 
 type httpResponseWriter struct {
 	http.ResponseWriter
@@ -33,40 +42,11 @@ type authRequest struct {
 	Channels []string `json:channels`
 }
 
-var conn *types.Conn
-var key string
-var domain string
-var edit_channel string
-var datasource *types.Datasource
-var templates *template.Template
-var basePath string = conf.GetBasePath()
-var csrfKey string
-
-func getToken(user string, timestamp string, secret string) string {
-	info := ""
-	token := auth.GenerateClientToken(secret, user, timestamp, info)
-	return token
-}
-
-func initWs(addr string, k string) {
-	key = k
-	user := "microb_http"
-	timestamp := centrifuge.Timestamp()
-	token := getToken(user, timestamp, key)
-	conn = &types.Conn{addr, timestamp, user, token}
-}
-
-func parseTemplates() (*template.Template, *terr.Trace) {
-	path := basePath + "/templates/*"
-	tmps := template.Must(template.ParseGlob(path))
-	templates = tmps
-	return tmps, nil
-}
-
 func Init(server *types.HttpServer, ws bool, addr string, key string, dm string, ec string, ds *types.Datasource, isDev bool, isMail bool, icsrfKey string) {
 	domain = dm
 	datasource = ds
 	edit_channel = ec
+	dev = isDev
 	csrfKey = icsrfKey
 	if ws {
 		initWs(addr, key)
@@ -92,7 +72,7 @@ func Init(server *types.HttpServer, ws bool, addr string, key string, dm string,
 			r.Get("/", mail.ServeMailForm)
 		})
 	}
-	// authentication for command channel
+	// authentication for edit channel
 	r.Route("/centrifuge", func(r chi.Router) {
 		r.Post("/auth", serveAuth)
 	})
@@ -136,28 +116,46 @@ func ParseTemplates() {
 
 // internal methods
 
+func getToken(user string, timestamp string, secret string) string {
+	info := ""
+	token := auth.GenerateClientToken(secret, user, timestamp, info)
+	return token
+}
+
+func initWs(addr string, k string) {
+	key = k
+	user := "microb_http"
+	timestamp := centrifuge.Timestamp()
+	token := getToken(user, timestamp, key)
+	conn = &types.Conn{addr, timestamp, user, token}
+}
+
+func parseTemplates() (*template.Template, *terr.Trace) {
+	path := basePath + "/templates/*"
+	tmps := template.Must(template.ParseGlob(path))
+	templates = tmps
+	return tmps, nil
+}
+
 func fileServer(r chi.Router, path string, root http.FileSystem) {
 	if strings.ContainsAny(path, "{}*") {
 		panic("FileServer does not permit URL parameters.")
 	}
-
 	fs := http.StripPrefix(path, http.FileServer(root))
-
 	if path != "/" && path[len(path)-1] != '/' {
 		r.Get(path, http.RedirectHandler(path+"/", 301).ServeHTTP)
 		path += "/"
 	}
 	path += "*"
-
 	r.Get(path, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fs.ServeHTTP(w, r)
 	}))
 }
 
-func handleRequest(req *http.Request) {
-	/*path := req.URL.Path
-	host := req.URL.Host
-	header := req.Header
+func handleRequest(r *http.Request) {
+	/*path := r.URL.Path
+	host := r.URL.Host
+	header := r.Header
 	ua := header["User-Agent"][0]
 	lang := header["Accept-Language"][0]
 	cl := header["ContentLength"]
@@ -165,9 +163,9 @@ func handleRequest(req *http.Request) {
 	fmt.Println(ua, lang, cl)*/
 }
 
-func serveRequest(resp http.ResponseWriter, req *http.Request) {
-	handleRequest(req)
-	url := req.URL.Path
+func serveRequest(resp http.ResponseWriter, r *http.Request) {
+	handleRequest(r)
+	url := r.URL.Path
 	status := http.StatusOK
 	resp = httpResponseWriter{resp, &status}
 	page, tr := getPage(domain, url, conn, edit_channel)
@@ -216,12 +214,12 @@ func render500(resp http.ResponseWriter, page *types.Page) {
 	}
 }
 
-func serveAuth(resp http.ResponseWriter, req *http.Request) {
+func serveAuth(w http.ResponseWriter, r *http.Request) {
 	// this is used only for autoreload in dev
-	if isdev == false {
+	if dev == false {
 		return
 	}
-	decoder := json.NewDecoder(req.Body)
+	decoder := json.NewDecoder(r.Body)
 	var data authRequest
 	err := decoder.Decode(&data)
 	if err != nil {
@@ -230,7 +228,7 @@ func serveAuth(resp http.ResponseWriter, req *http.Request) {
 		tr := terr.New("httpServer.serveAuth", err)
 		events.Error("http", msg, tr)
 	}
-	r := map[string]map[string]string{}
+	resp := map[string]map[string]string{}
 	for _, channel := range data.Channels {
 		client := data.Client
 		info := ""
@@ -239,17 +237,17 @@ func serveAuth(resp http.ResponseWriter, req *http.Request) {
 			"sign": sign,
 			"info": info,
 		}
-		r[channel] = s
+		resp[channel] = s
 	}
-	resp.Header().Set("Content-Type", "application/json")
-	json_bytes, err := json.Marshal(r)
+	w.Header().Set("Content-Type", "application/json")
+	json_bytes, err := json.Marshal(resp)
 	if err != nil {
 		msg := "Can not marshall json"
 		err := errors.New(msg)
 		tr := terr.New("httpServer.serveAuth", err)
 		events.Error("http", msg, tr)
 	}
-	fmt.Fprintf(resp, "%s\n", json_bytes)
+	fmt.Fprintf(w, "%s\n", json_bytes)
 }
 
 func stopMsg() string {

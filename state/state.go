@@ -51,7 +51,8 @@ func Init(dev bool, start bool) *terr.Trace {
 			return tr
 		}
 	}
-	// watcher for hot reload
+	// watcher for templates reparsing on change
+	// and hot reload for development
 	go watcher.Start(BasePath, Conf.Datasource.Path, cli, Conf.EditChan, dev)
 	return nil
 }

@@ -20,16 +20,6 @@ func GetBasePath() string {
 		panic(err)
 	}
 	cp := filepath.Dir(ex)
-	/*
-		filename, err := filepath.Abs(filepath.Dir(os.Args[0]))
-		if err != nil {
-			msg := "Can not find base directory"
-			tr := terr.New("conf.GetConfigPath", err)
-			events.New("error", "http", "conf.GetConfigPath", msg, tr)
-			return ""
-		}
-		cp := fmt.Sprintf("%s", path.Dir(filename)) + "/microb-http"
-	*/
 	return cp
 }
 
@@ -42,7 +32,7 @@ func GetConf() (*types.Conf, *terr.Trace) {
 	viper.SetDefault("domain", "localhost")
 	viper.SetDefault("addr", "localhost:8080")
 	viper.SetDefault("centrifugo_addr", "localhost:8001")
-	viper.SetDefault("websockets", false)
+	viper.SetDefault("websockets", true)
 	viper.SetDefault("mail", false)
 	viper.SetDefault("datasource", map[string]interface{}{})
 	// get the actual conf
