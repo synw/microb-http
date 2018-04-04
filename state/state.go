@@ -9,7 +9,6 @@ import (
 	"github.com/synw/microb-http/types"
 	"github.com/synw/microb-http/watcher"
 	"github.com/synw/microb/libmicrob/events"
-	"github.com/synw/microb/libmicrob/msgs"
 	"github.com/synw/terr"
 	"net/http"
 )
@@ -53,10 +52,7 @@ func Init(dev bool, start bool) *terr.Trace {
 		}
 	}
 	// watcher for hot reload
-	if dev == true {
-		msgs.Status("Initializing files watcher")
-		go watcher.Start(BasePath, Conf.Datasource.Path, cli, Conf.EditChan)
-	}
+	go watcher.Start(BasePath, Conf.Datasource.Path, cli, Conf.EditChan, dev)
 	return nil
 }
 

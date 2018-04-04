@@ -8,8 +8,11 @@ import (
 	"github.com/synw/terr"
 )
 
-func handle(cli *centcom.Cli, channel string) {
+func handle(cli *centcom.Cli, channel string, dev bool) {
 	httpServer.ParseTemplates()
+	if dev == false {
+		return
+	}
 	p := map[string]string{"reload": "true"}
 	payload, err := json.Marshal(p)
 	if err != nil {

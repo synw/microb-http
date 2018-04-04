@@ -11,7 +11,8 @@ import (
 
 var w = wa.New()
 
-func Start(basePath string, path string, cli *centcom.Cli, channel string) {
+func Start(basePath string, path string, cli *centcom.Cli, channel string, dev bool) {
+	msgs.Status("Initializing files watcher")
 	iserr := false
 	err := w.AddRecursive(basePath + "/templates")
 	if err != nil {
@@ -50,7 +51,7 @@ func Start(basePath string, path string, cli *centcom.Cli, channel string) {
 			select {
 			case e := <-w.Event:
 				msgs.Msg("Change detected in " + e.Path + ": reloading")
-				handle(cli, channel)
+				handle(cli, channel, dev)
 			case err := <-w.Error:
 				msgs.Msg("Watcher error " + err.Error())
 			case <-w.Closed:
