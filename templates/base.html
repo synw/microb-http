@@ -1,0 +1,32 @@
+{{define "base"}}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>{{ .Title }}</title>
+	{{ template  "head.html"  . }} 
+</head>
+<body>
+	<div id="header">
+		{{ template  "header.html"  . }} 
+	</div>
+	<div class="hidden-xs">
+		<div id="navbar">
+			{{ template  "navbar.html"  . }} 
+		</div>
+	</div>
+	<div id="popup_menu" style="display:none">
+		{{ template  "popup_menu.html"  . }} 
+	</div>
+	<div id="content">
+		{{ .Content }}
+		{{if eq .Url "/mail"}}
+			{{block "mail" .}}{{end}}
+		{{end}}
+	</div>
+	<div id="footer">
+		{{ template  "footer.html"  . }} 
+	</div>
+{{ template "websockets.html" . }}
+</body>
+</html>
+{{ end }}

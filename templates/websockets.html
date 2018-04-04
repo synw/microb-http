@@ -1,0 +1,47 @@
+{{ if .Conn }}
+	<script>
+	var centrifuge = new Centrifuge({
+	    url: "http://{{ .Conn.Addr }}",
+	    user: "{{ .Conn.User }}",
+	    timestamp: "{{ .Conn.Timestamp }}",
+	    token: "{{ .Conn.Token }}"
+	});
+	
+	var callbacks = {
+	    "message": function(dataset) {
+	    	console.log("MSG ");
+	    	console.log('DATASET: '+JSON.stringify(dataset), dataset.data.reload);
+	    	if (dataset.data.reload == "true") {
+	    		window.location.reload(true);
+	    	}
+	    },
+	    "join": function(message) {
+	    	console.log('JOIN: '+JSON.stringify(message));
+	    },
+	    "leave": function(message) {
+	    	console.log('LEAVE: '+JSON.stringify(message));
+	    },
+	    "subscribe": function(context) {
+	    	console.log('SUBSCRIBE: '+JSON.stringify(context));
+	    },
+	    "error": function(errContext) {
+	    	console.log('ERROR: '+JSON.stringify(errContext));
+	    },
+	    "unsubscribe": function(context) {
+	    	console.log('UNSUBSCRIBE: '+JSON.stringify(context));
+	    }
+	}
+	
+	var subscription = centrifuge.subscribe("{{ .EditChan }}", callbacks);
+	
+	centrifuge.on('connect', function(context) {
+		console.log("Connection ("+context.latency+"ms)");
+	});
+	
+	centrifuge.on('disconnect', function(context) {
+		console.log("Disconnection: "+context.reason);
+	});
+	
+	centrifuge.connect();
+</script>
+{{ end }}
