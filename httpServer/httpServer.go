@@ -88,6 +88,7 @@ func Init(server *types.HttpServer, ws bool, addr string, key string, dm string,
 	if isMail == true {
 		r.Route("/mail", func(r chi.Router) {
 			r.Post("/post", mail.ProcessMailForm)
+			r.Get("/ok", serveRequest)
 			r.Get("/", mail.ServeMailForm)
 		})
 	}
