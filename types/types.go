@@ -46,20 +46,22 @@ type Conn struct {
 
 type Hit struct {
 	gorm.Model
-	Ip          string `json:ip`
-	Path        string `json:path`
-	Host        string `json:host`
-	Ua          string `json:ua`
-	Lang        string `json:lang`
-	Length      string `json:length`
-	Status      int    `json:status`
-	City        string
-	Subdivision string
-	CountryName string
-	CountryCode string
-	Timezone    string
-	Latitude    float64
-	Longitude   float64
+	Ip            string `json:ip`
+	Path          string `json:path`
+	Host          string `json:host`
+	Ua            string `json:ua`
+	Lang          string `json:lang`
+	Length        string `json:length`
+	Status        int    `json:status`
+	City          string
+	Subdivision   string
+	CountryName   string
+	CountryCode   string
+	Timezone      string
+	Latitude      float64
+	Longitude     float64
+	IsProxy       bool
+	IsSatProvider bool
 }
 
 type Page struct {

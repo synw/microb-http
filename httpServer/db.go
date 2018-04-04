@@ -64,21 +64,25 @@ func getHit(datapoint map[string]interface{}, db *geoip2.Reader) *types.Hit {
 	tz := geo.Location.TimeZone
 	lat := geo.Location.Latitude
 	long := geo.Location.Longitude
+	ano := geo.Traits.IsAnonymousProxy
+	sat := geo.Traits.IsSatelliteProvider
 	hit := &types.Hit{
-		Ip:          ip,
-		Path:        path,
-		Host:        host,
-		Ua:          ua,
-		Lang:        lang,
-		Length:      length,
-		Status:      status,
-		City:        city,
-		Subdivision: sub,
-		CountryName: country,
-		CountryCode: code,
-		Timezone:    tz,
-		Latitude:    lat,
-		Longitude:   long,
+		Ip:            ip,
+		Path:          path,
+		Host:          host,
+		Ua:            ua,
+		Lang:          lang,
+		Length:        length,
+		Status:        status,
+		City:          city,
+		Subdivision:   sub,
+		CountryName:   country,
+		CountryCode:   code,
+		Timezone:      tz,
+		Latitude:      lat,
+		Longitude:     long,
+		IsProxy:       ano,
+		IsSatProvider: sat,
 	}
 	return hit
 }

@@ -17,7 +17,7 @@ func saveHits(key string) {
 			tr := terr.New("httpServer.worker.saveHits", err)
 			events.Error("http", "Error opening geo ip database", tr, "fatal")
 		}
-		duration := time.Second * 2
+		duration := time.Second * 10
 		time.Sleep(duration)
 		// get the data from Redis
 		keys, err := redis.GetKeys(key)
