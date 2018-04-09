@@ -1,6 +1,6 @@
 # Microb http
 
-Http service for Microb. Features:
+Http service for [Microb](https://github.com/synw/microb). Features:
 
 - **Serve html** from the filesystem (other datasources are planned for later)
 - **Record hits** into an sqlite database with geoip info
@@ -13,7 +13,7 @@ Requirements:
 
 #### Install and status
 
-To install you have to compile [Microb](https://github.com/synw/microb) with the http service 
+To install you have to compile Microb with the http service 
 for now as no release has been made. The dev status is move fast and break things for the moment.
 
 To autoreload pages and templates during development start the instance 
