@@ -1,0 +1,46 @@
+# Microb http
+
+Http service for Microb. Features:
+
+- **Serve html** from the filesystem (other datasources are planned for later)
+- **Record hits** into an sqlite database with geoip info
+- **Autoreload** pages and templates for development
+
+As this is a Microb service it has remote commands and records logs into an sqlite database
+
+Requirements: 
+[Centrifugo](https://github.com/centrifugal/centrifugo/) and [Redis](http://redis.io/)
+
+#### Install and status
+
+To install you have to compile [Microb](https://github.com/synw/microb) with the http service 
+for now as no release has been made. The dev status is move fast and break things for the moment.
+
+To autoreload pages and templates during development start the instance 
+with the `-d` flag: `./microb -d`
+
+To start the http server without the Microb client: `./microb -s`
+
+## Usage
+
+To serve pages using the filesystem create content in `static/content`. Ex: `index.html`:
+
+   ```html
+   <!-- Title:My homepage -->
+   <h1>Home</h1>
+   ```
+   
+The `<!-- Title:My homepage -->` will be used to populate the `<title>` head tag.
+
+The urls will automatically map to the filesystem structure: `static/content/folder/page.html` 
+will be accessible at `/folder/page`
+
+## Cli commands
+
+`ping`: check if the http server is up
+
+`status`: tells if the server is running
+
+`start`: start the http server
+
+`stop`: stop the http server
