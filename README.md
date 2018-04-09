@@ -21,6 +21,22 @@ with the `-d` flag: `./microb -d`
 
 To start the http server without the Microb client: `./microb -s`
 
+#### Configuration
+
+Configure `config_http.json`:
+
+   ```javascript
+   {
+	   "centrifugo_addr":"localhost:8001",
+	   "centrifugo_key":"secret_key",
+	   "domain": "localhost",
+	   "addr":"localhost:8080",
+	   "mail":false,
+	   "csrf_key":"297gcbbb-2b24-4262-b6f7-817e0983fbb7",
+	   "hitsDb": "hits.sqlite"
+   }
+   ```
+
 ## Usage
 
 To serve pages using the filesystem create content in `static/content`. Ex: `index.html`:
