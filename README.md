@@ -39,6 +39,15 @@ Configure `config_http.json`:
 
 ## Usage
 
+### Templates
+
+The templates are in the `templates` folder. These are editable Go templates.
+
+**Note**: when the templates are edited they will be automatically reparsed, no need for a
+server restart
+
+### Content
+
 To serve pages using the filesystem create content in `static/content`. Ex: `index.html`:
 
    ```html
@@ -49,7 +58,16 @@ To serve pages using the filesystem create content in `static/content`. Ex: `ind
 The `<!-- Title:My homepage -->` will be used to populate the `<title>` head tag.
 
 The urls will automatically map to the filesystem structure: `static/content/folder/page.html` 
-will be accessible at `/folder/page`
+will be accessible at `/folder/page` 
+
+### Static files
+
+All that is in the `static` folder will be accessible at `/static`
+
+### Hot reload
+
+If the dev mode is enabled any change in templates, content or static files will
+trigger a reload in the browser
 
 ## Cli commands
 
