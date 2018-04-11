@@ -28,17 +28,22 @@ func Start(basePath string, path string, cli *centcom.Cli, channel string, dev b
 	}
 	w.FilterOps(wa.Write, wa.Create, wa.Move, wa.Remove, wa.Rename)
 	if iserr == false {
-		msgs.State("Dev mode is enabled: watching files for change")
-		/*for path, f := range w.WatchedFiles() {
-			fmt.Printf("%s %s\n", f.Name(), path)
-		}*/
+		if dev == true {
+			msgs.State("Dev mode is enabled: watching files for change")
+			/*for path, f := range w.WatchedFiles() {
+				fmt.Printf("%s %s\n", f.Name(), path)
+			}*/
+		}
+	} else {
+		tr := terr.New("watcher.Start", err)
+		events.Error("http", "Error initializing the files watcher", tr)
 	}
 	// lauch listener
 	go func() {
 		for {
 			select {
 			case e := <-w.Event:
-				msgs.Msg("Change detected in " + e.Path + ": reloading")
+				msgs.Msg("Change detected in " + e.Path)
 				handle(cli, channel, dev)
 			case err := <-w.Error:
 				msgs.Msg("Watcher error " + err.Error())
