@@ -20,22 +20,10 @@ func Start(basePath string, path string, cli *centcom.Cli, channel string, dev b
 		events.Error("http", "Error finding templates", tr)
 		iserr = true
 	}
-	err = w.AddRecursive(basePath + "/static/js")
+	err = w.AddRecursive(basePath + "/static")
 	if err != nil {
 		tr := terr.New("watcher.Start", err)
-		events.Error("http", "Error finding static/js", tr)
-		iserr = true
-	}
-	err = w.AddRecursive(basePath + "/static/css")
-	if err != nil {
-		tr := terr.New("watcher.Start", err)
-		events.Error("http", "Error finding static/css", tr)
-		iserr = true
-	}
-	err = w.AddRecursive(basePath + "/static/content")
-	if err != nil {
-		tr := terr.New("watcher.Start", err)
-		events.Error("http", "Error finding static/content", tr)
+		events.Error("http", "Error finding static", tr)
 		iserr = true
 	}
 	w.FilterOps(wa.Write, wa.Create, wa.Move, wa.Remove, wa.Rename)
