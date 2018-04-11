@@ -12,7 +12,7 @@ import (
 
 func saveHits(key string) {
 	for {
-		geoDb, err := geoip2.Open("db/GeoLite2-City.mmdb")
+		geoDb, err := geoip2.Open("db/geo/GeoLite2-City.mmdb")
 		if err != nil {
 			tr := terr.New("httpServer.worker.saveHits", err)
 			events.Error("http", "Error opening geo ip database", tr, "fatal")

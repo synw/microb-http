@@ -34,7 +34,7 @@ func GetConf() (*types.Conf, *terr.Trace) {
 	viper.SetDefault("centrifugo_addr", "localhost:8001")
 	viper.SetDefault("websockets", true)
 	viper.SetDefault("mail", false)
-	viper.SetDefault("hitsDb", "hits.slqite")
+	viper.SetDefault("hitsDb", "db/hits.slqite")
 	viper.SetDefault("datasource", map[string]interface{}{})
 	// get the actual conf
 	err := viper.ReadInConfig()
