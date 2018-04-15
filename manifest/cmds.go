@@ -5,7 +5,6 @@ import (
 	"github.com/synw/microb-http/state"
 	"github.com/synw/microb-http/state/mutate"
 	//"github.com/synw/microb/libmicrob/events"
-	//"github.com/synw/microb/libmicrob/msgs"
 	"github.com/synw/microb/libmicrob/types"
 	"github.com/synw/terr"
 )
@@ -31,7 +30,7 @@ func status() *types.Cmd {
 	return cmd
 }
 
-func runStatus(cmd *types.Cmd, c chan *types.Cmd) {
+func runStatus(cmd *types.Cmd, c chan *types.Cmd, args ...interface{}) {
 	var resp []interface{}
 	var msg string
 	if state.HttpServer.State.Current() == "start" {
@@ -50,22 +49,23 @@ func start() *types.Cmd {
 	return cmd
 }
 
-func runStart(cmd *types.Cmd, c chan *types.Cmd) {
+func runStart(cmd *types.Cmd, c chan *types.Cmd, args ...interface{}) {
 	server := state.HttpServer
 	if state.HttpServer.State.Current() == "start" {
 		msg := "The http server is already started"
 		err := errors.New(msg)
 		tr := terr.New("runStart", err)
-		//events.Terr("http", "cmd.runStart", msg, tr)
+		//events.Error("http", msg, tr, "warning")
 		cmd.Status = "error"
 		cmd.Trace = tr
+		cmd.ErrMsg = tr.Format()
 		c <- cmd
 		return
 	}
 	tr := mutate.StartHttpServer(server)
 	if tr != nil {
 		msg := "Error starting http service"
-		//events.Terr("http", "cmd.runStart", msg, tr)
+		//events.Error("http", msg, tr, "warning")
 		cmd.Status = "error"
 		cmd.ErrMsg = msg
 		cmd.Trace = tr
@@ -84,7 +84,7 @@ func stop() *types.Cmd {
 	return cmd
 }
 
-func runStop(cmd *types.Cmd, c chan *types.Cmd) {
+func runStop(cmd *types.Cmd, c chan *types.Cmd, args ...interface{}) {
 	server := state.HttpServer
 	if state.HttpServer.State.Current() == "stop" {
 		msg := "The http server is not running"
