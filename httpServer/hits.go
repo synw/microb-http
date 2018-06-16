@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"github.com/Tomasen/realip"
 	"github.com/synw/microb-http/types"
-	"github.com/synw/microb/libmicrob/redis"
+	"github.com/synw/microb/redis"
 	"net/http"
 )
 
 func processHit(r *http.Request, status int) {
 	hit := getRequestData(r, status)
-	saveDatapoint(hit)
+	go saveDatapoint(hit)
 }
 
 func saveDatapoint(hit *types.Hit) error {

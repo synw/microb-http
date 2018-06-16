@@ -5,7 +5,7 @@ import (
 	//"fmt"
 	"github.com/spf13/viper"
 	"github.com/synw/microb-http/types"
-	//"github.com/synw/microb/libmicrob/events"
+	//"github.com/synw/microb/events"
 	"github.com/synw/terr"
 	"os"
 	//"path"
@@ -42,12 +42,12 @@ func GetConf() (*types.Conf, *terr.Trace) {
 		var conf *types.Conf
 		switch err.(type) {
 		case viper.ConfigParseError:
-			er := errors.New("Error parsing config " + err.Error())
-			tr := terr.New("conf.getConf", er)
+			err := errors.New("Error parsing config " + err.Error())
+			tr := terr.New(err)
 			return conf, tr
 		default:
 			err := errors.New("Unable to locate config file at path " + cp)
-			tr := terr.New("conf.getConf", err)
+			tr := terr.New(err)
 			return conf, tr
 		}
 	}

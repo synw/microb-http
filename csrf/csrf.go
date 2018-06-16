@@ -3,7 +3,7 @@ package csrf
 import (
 	"crypto/rand"
 	"fmt"
-	"github.com/synw/microb/libmicrob/redis"
+	"github.com/synw/microb/redis"
 	"github.com/synw/terr"
 )
 
@@ -16,7 +16,7 @@ func randToken() string {
 func VerifyToken(token string) *terr.Trace {
 	_, err := redis.GetKey(token)
 	if err != nil {
-		tr := terr.New("csrf.VerifyToken", err)
+		tr := terr.New(err)
 		return tr
 	}
 	return nil
@@ -28,13 +28,13 @@ func GetToken() (string, *terr.Trace) {
 	token := randToken()
 	_, err := conn.Do("SET", token, "")
 	if err != nil {
-		tr := terr.New("csrf.GetToken", err)
+		tr := terr.New(err)
 		return token, tr
 	}
 	ttl := 900 // the tokens will live for 15 minutes
 	_, err = conn.Do("EXPIRE", token, ttl)
 	if err != nil {
-		tr := terr.New("csrf.GetToken", err)
+		tr := terr.New(err)
 		return token, tr
 	}
 	return token, nil

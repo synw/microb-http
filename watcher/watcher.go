@@ -3,8 +3,8 @@ package watcher
 import (
 	wa "github.com/radovskyb/watcher"
 	"github.com/synw/centcom"
-	"github.com/synw/microb/libmicrob/events"
-	"github.com/synw/microb/libmicrob/msgs"
+	"github.com/synw/microb/events"
+	"github.com/synw/microb/msgs"
 	"github.com/synw/terr"
 	"time"
 )
@@ -16,13 +16,13 @@ func Start(basePath string, path string, cli *centcom.Cli, channel string, dev b
 	iserr := false
 	err := w.AddRecursive(basePath + "/templates")
 	if err != nil {
-		tr := terr.New("watcher.Start", err)
+		tr := terr.New(err)
 		events.Error("http", "Error finding templates", tr)
 		iserr = true
 	}
 	err = w.AddRecursive(basePath + "/static")
 	if err != nil {
-		tr := terr.New("watcher.Start", err)
+		tr := terr.New(err)
 		events.Error("http", "Error finding static", tr)
 		iserr = true
 	}
@@ -35,7 +35,7 @@ func Start(basePath string, path string, cli *centcom.Cli, channel string, dev b
 			}*/
 		}
 	} else {
-		tr := terr.New("watcher.Start", err)
+		tr := terr.New(err)
 		events.Error("http", "Error initializing the files watcher", tr)
 	}
 	// lauch listener
@@ -56,7 +56,7 @@ func Start(basePath string, path string, cli *centcom.Cli, channel string, dev b
 	// start listening
 	err = w.Start(time.Millisecond * 200)
 	if err != nil {
-		tr := terr.New("watcher.Start", err)
+		tr := terr.New(err)
 		events.Error("http", "Error starting the watcher", tr)
 	}
 }

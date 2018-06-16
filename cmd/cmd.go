@@ -5,8 +5,8 @@ import (
 	"github.com/synw/microb-http/state"
 	"github.com/synw/microb-http/state/mutate"
 	"github.com/synw/microb-http/types"
-	"github.com/synw/microb/libmicrob/events"
-	datatypes "github.com/synw/microb/libmicrob/types"
+	"github.com/synw/microb/events"
+	datatypes "github.com/synw/microb/types"
 )
 
 func Dispatch(cmd *datatypes.Command) *datatypes.Command {

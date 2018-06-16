@@ -20,7 +20,7 @@ func getPage(domain string, url string, conn *types.Conn, edit_channel string) (
 	filepath := basePath + "/static/content/" + getFilepath(url)
 	title, content, tr := getContent(filepath)
 	if tr != nil {
-		tr := terr.Pass("httpServer.data.getPage", tr)
+		tr := tr.Pass("httpServer.data.getPage")
 		var p *types.Page
 		return p, tr
 	}
@@ -31,7 +31,7 @@ func getPage(domain string, url string, conn *types.Conn, edit_channel string) (
 func getContent(filepath string) (string, string, *terr.Trace) {
 	f, err := os.Open(filepath)
 	if err != nil {
-		tr := terr.New("httpServer.data.getContent", err)
+		tr := terr.New(err)
 		return "", "", tr
 	}
 	scanner := bufio.NewScanner(f)

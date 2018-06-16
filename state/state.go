@@ -8,7 +8,7 @@ import (
 	"github.com/synw/microb-http/state/mutate"
 	"github.com/synw/microb-http/types"
 	"github.com/synw/microb-http/watcher"
-	"github.com/synw/microb/libmicrob/events"
+	"github.com/synw/microb/events"
 	"github.com/synw/terr"
 	"net/http"
 )
@@ -21,7 +21,7 @@ var BasePath string = conf.GetBasePath()
 func Init(dev bool, start bool) *terr.Trace {
 	Conf, tr := conf.GetConf()
 	if tr != nil {
-		tr := terr.Pass("state.Init", tr)
+		tr = tr.Pass()
 		events.Error("http", "Unable to init http server config", tr)
 		return tr
 	}
@@ -34,12 +34,12 @@ func Init(dev bool, start bool) *terr.Trace {
 	cli = centcom.NewClient(Conf.WsAddr, Conf.WsKey)
 	err := centcom.Connect(cli)
 	if err != nil {
-		tr := terr.New("state.Init", err)
+		tr := terr.New(err)
 		return tr
 	}
 	err = cli.CheckHttp()
 	if err != nil {
-		tr := terr.New("state.Init", err)
+		tr := terr.New(err)
 		return tr
 	}
 	// initialize the state machine
@@ -47,7 +47,7 @@ func Init(dev bool, start bool) *terr.Trace {
 	if start == true {
 		tr := mutate.StartHttpServer(HttpServer)
 		if tr != nil {
-			tr := terr.New("state.Init", err)
+			tr := terr.New(err)
 			return tr
 		}
 	}

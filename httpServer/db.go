@@ -5,27 +5,27 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/oschwald/geoip2-golang"
 	"github.com/synw/microb-http/types"
-	"github.com/synw/microb/libmicrob/msgs"
+	"github.com/synw/microb/msgs"
 	"github.com/synw/terr"
 	"net"
 )
 
 var database *gorm.DB
 
-func connect(addr string) (*gorm.DB, *terr.Trace) {
+func connectHits(addr string) (*gorm.DB, *terr.Trace) {
 	db, err := gorm.Open("sqlite3", addr)
 	if err != nil {
-		tr := terr.New("httpServer.db.connect", err)
+		tr := terr.New(err)
 		return db, tr
 	}
 	return db, nil
 }
 
-func initDb(addr string, hostname string) *terr.Trace {
+func initHitsDb(addr string, hostname string) *terr.Trace {
 	msgs.Status("Initializing hits database")
-	db, tr := connect(addr)
+	db, tr := connectHits(addr)
 	if tr != nil {
-		tr := terr.Pass("httpServer.db.initDb", tr)
+		tr := tr.Pass()
 		return tr
 	}
 	db.AutoMigrate(&types.Hit{})
@@ -39,7 +39,6 @@ func getGeoIp(ipin string, db *geoip2.Reader) (*geoip2.City, error) {
 	if dev == true {
 		ipin = "81.2.69.142"
 	}
-	// If you are using strings that may be invalid, check that ip is not nil
 	ip := net.ParseIP(ipin)
 	record, err := db.City(ip)
 	if err != nil {
@@ -88,8 +87,10 @@ func getHit(datapoint map[string]interface{}, db *geoip2.Reader) *types.Hit {
 }
 
 func saveToDb(hits []*types.Hit) *terr.Trace {
+	tx := database.Begin()
 	for _, hit := range hits {
-		database.Create(hit)
+		tx.Create(hit)
 	}
+	tx.Commit()
 	return nil
 }

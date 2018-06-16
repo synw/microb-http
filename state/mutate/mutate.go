@@ -10,13 +10,13 @@ import (
 func StartHttpServer(server *types.HttpServer) *terr.Trace {
 	if server.State.Current() == "start" {
 		err := errors.New("The http server is already running")
-		tr := terr.New("state.mutate.StartHttpServer", err)
+		tr := terr.New(err)
 		return tr
 	}
 	go httpServer.Run(server)
 	err := server.State.Event("start")
 	if err != nil {
-		tr := terr.New("state.mutate.StartHttpServer", err)
+		tr := terr.New(err)
 		return tr
 	}
 	return nil
@@ -25,7 +25,7 @@ func StartHttpServer(server *types.HttpServer) *terr.Trace {
 func StopHttpServer(server *types.HttpServer) *terr.Trace {
 	if server.State.Current() == "stop" {
 		err := errors.New("The http server is not running")
-		tr := terr.New("state.mutate.StopHttpServer", err)
+		tr := terr.New(err)
 		return tr
 	}
 	tr := httpServer.Stop(server)
@@ -34,7 +34,7 @@ func StopHttpServer(server *types.HttpServer) *terr.Trace {
 	}
 	err := server.State.Event("stop")
 	if err != nil {
-		tr := terr.New("state.mutate.StopHttpServer", err)
+		tr := terr.New(err)
 		return tr
 	}
 	return nil

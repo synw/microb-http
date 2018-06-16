@@ -1,7 +1,7 @@
 package info
 
 import (
-	"github.com/synw/microb/libmicrob/datatypes"
+	"github.com/synw/microb/datatypes"
 	"github.com/synw/microb/services/httpServer/state"
 )
 
