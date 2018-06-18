@@ -107,7 +107,6 @@ func Stop(server *types.HttpServer) *terr.Trace {
 	err := srv.Shutdown(ctx)
 	if err != nil {
 		tr := terr.New(err)
-		events.Error("http", stopMsg(), tr)
 		return tr
 	}
 	events.State("http", stopMsg())

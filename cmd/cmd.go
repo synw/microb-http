@@ -36,7 +36,6 @@ func start(cmd *datatypes.Command, server *types.HttpServer) *datatypes.Command 
 	if tr != nil {
 		cmd.Trace = tr
 		cmd.Status = "error"
-		events.Terr("http", "cmd.Start", "Error starting http service", tr)
 		return cmd
 	}
 	var resp []interface{}
@@ -51,7 +50,6 @@ func stop(cmd *datatypes.Command, server *types.HttpServer) *datatypes.Command {
 	if tr != nil {
 		cmd.Trace = tr
 		cmd.Status = "error"
-		events.Terr("http", "cmd.Stop", "Error stopping http service", tr)
 		return cmd
 	}
 	var resp []interface{}

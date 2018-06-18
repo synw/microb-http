@@ -88,9 +88,7 @@ func stop() *types.Cmd {
 func runStop(cmd *types.Cmd, c chan *types.Cmd, args ...interface{}) {
 	server := state.HttpServer
 	if state.HttpServer.State.Current() == "stop" {
-		msg := "The http server is not running"
-		err := errors.New(msg)
-		tr := terr.New(err)
+		tr := terr.New("The http server is not running")
 		cmd.Status = "error"
 		cmd.Trace = tr
 		c <- cmd
@@ -98,9 +96,8 @@ func runStop(cmd *types.Cmd, c chan *types.Cmd, args ...interface{}) {
 	}
 	tr := mutate.StopHttpServer(server)
 	if tr != nil {
-		msg := "Error stoping http service"
+		tr.Add("Error stoping http service")
 		cmd.Status = "error"
-		cmd.ErrMsg = msg
 		cmd.Trace = tr
 		c <- cmd
 		return
