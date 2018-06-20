@@ -59,16 +59,14 @@ func runStart(cmd *types.Cmd, c chan *types.Cmd, args ...interface{}) {
 		//events.Error("http", msg, tr, "warning")
 		cmd.Status = "error"
 		cmd.Trace = tr
-		cmd.ErrMsg = tr.Error()
 		c <- cmd
 		return
 	}
 	tr := mutate.StartHttpServer(server)
 	if tr != nil {
 		msg := "Error starting http service"
-		//events.Error("http", msg, tr, "warning")
 		cmd.Status = "error"
-		cmd.ErrMsg = msg
+		tr.Add(msg)
 		cmd.Trace = tr
 		c <- cmd
 		return
